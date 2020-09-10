@@ -1,0 +1,19 @@
+{
+  "name": "mwm-bitmapper",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "nodemon index.js",
+    "examine": "node examine.js"
+  },
+  "dependencies": {
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "http-errors": "~1.6.3",
+    "mwm-renderer": "^0.1.1",
+    "pngjs": "^5.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
