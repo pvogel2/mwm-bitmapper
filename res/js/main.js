@@ -1,7 +1,8 @@
 let renderer = null;
 const OrbitControls = THREE.OrbitControls;
 
-function imageLoaded(event) {
+let countMeshes = 0;
+function imageLoaded(merge, event) {
     const img = event.currentTarget;
     const width = img.width;
     const height = img.height;
@@ -13,7 +14,7 @@ function imageLoaded(event) {
     c.style.border = '1px solid white';
     c.width = width;
     c.height = height;
-    document.body.appendChild(c);
+    //document.body.appendChild(c);
     const ctx = c.getContext( '2d' );
     ctx.drawImage(img, 0, 0);
 
@@ -24,13 +25,20 @@ function imageLoaded(event) {
     let j = 0;
     let maxValue = 0;
     let minValue = 0;
+    const scale = 1;
     for (let i = 0; i < pixels.length; i += 4) {
-        maxValue = Math.max(maxValue, pixels[i]);
-        minValue = Math.min(minValue, pixels[i]);
-        data[j++] = pixels[i];// * 0.1;
+        let p = pixels[i] / 255;
+        if (merge) {
+             p += pixels[i + 1];
+        }
+        maxValue = Math.max(maxValue, pixels[i + 1]);
+        minValue = Math.min(minValue, pixels[i + 1]);
+        data[j++] = p * scale;
     }
 
-    console.log(minValue, maxValue);
+    for (let i = 0; i < data.length; i++) {
+        data[i] -= (scale - 1) * maxValue; 
+    }
     const position = [];
     const indices = [];
     for (let h = 0; h < height; h++) {
@@ -38,36 +46,61 @@ function imageLoaded(event) {
           const idx = h * width + w;
           position.push(w - 0.5 * width, h - 0.5 * height, data[idx]);
           if (w < width - 1 && h < height - 1) {
-              indices.push(idx, idx + width, idx + 1);
-              indices.push(idx + 1, idx + width, idx + width + 1);
+              indices.push(idx, idx + 1, idx + width);
+              indices.push(idx + 1, idx + width + 1, idx + width);
           }
       }
     }
     const geo  = new THREE.BufferGeometry();
     geo.setIndex( indices );
     geo.setAttribute( 'position', new THREE.Float32BufferAttribute( position, 3 ) );
-
-    const material = new THREE.MeshBasicMaterial( {color: 0x444444, map: null, wireframe: true});
+    geo.computeVertexNormals();
+    const material = new THREE.MeshLambertMaterial( {color: 0x444444, map: null, wireframe: true, side: THREE.DoubleSide});
 
     const mesh = new THREE.Mesh( geo, material );
     mesh.rotation.x = Math.PI * -0.5;
-    renderer.addObject('themesh', mesh);
+    mesh.position.x = countMeshes++ * 1100;
+    renderer.addObject(`themesh${Math.random()}`, mesh);
 }
 
-function fetchImage() {
-  const url = '/res/img/small.png';
+function fetchImage(url, merge) {
+  //const url = '/res/img/terrain.png';
+  /// const url = '/res/img/out.png';
+  //const url = '/res/img/small.png';
   //const url = '/res/img/unrealIsland01.png';
   const img = new Image();
-  img.addEventListener('load', imageLoaded);
+  img.addEventListener('load', imageLoaded.bind(this, merge));
   img.src = url;
 }
 
+function addLight(renderer) {
+    const sun = new THREE.DirectionalLight( 0x666666, 2, 1000 );
+    sun.position.set(-400, 400, 0);
+    sun.castShadow = true;
+    sun.target.position.set(0, 0, 0);
+
+    //Set up shadow properties for the light
+    sun.shadow.mapSize.width = 2048;  // default
+    sun.shadow.mapSize.height = 2048; // default
+    sun.shadow.camera.near = 0.05;       // default
+    sun.shadow.camera.far = 1500;
+    var d = 1500;// default
+    sun.shadow.camera.left = - d;
+    sun.shadow.camera.right = d;
+    sun.shadow.camera.top = d;
+    sun.shadow.camera.bottom = - d;
+    sun.shadow.mapSize.width = 2048;
+    sun.shadow.mapSize.height = 2048;
+    renderer.addObject('sun', sun);
+}
 window.addEventListener('DOMContentLoaded', () => {
     renderer = new mwm.Renderer({
         parentSelector: '#threejscontainer',
         control: true,
     });
     renderer.addAxes(1);
+    addLight(renderer);
     renderer.start();
-    fetchImage();
+//    fetchImage('/res/img/bmout_unityisland.png', true);
+    fetchImage('/res/img/untitled.png', true);
 });

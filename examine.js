@@ -1,37 +1,137 @@
-var fs = require("fs"),
-  PNG = require("pngjs").PNG;
- 
-fs.createReadStream("res/img/unrealIsland01.png")
-  .pipe(
-    new PNG({
-      filterType: 4,
-    })
-  )
-  .on("parsed", function () {
-    for (var y = 0; y < this.height; y++) {
-      for (var x = 0; x < this.width; x++) {
-        var idx = (this.width * y + x) << 2;
- 
-        // invert color
-        const v = this.data[idx] * 2;
-        const vv = this.data[idx] * 2;
-        this.data[idx] = v >= 255 ? 255: v;
-        this.data[idx + 1] = v > 255 ? v - 255 : 0;
-        if (v > 255) {
-          //console.log(idx, vv, this.data[idx], this.data[idx+1], this.data[idx+2]);
-        }
-        this.data[idx + 2] = 0;//this.data[idx + 2] - 255;
- 
-        // and reduce opacity
-        // this.data[idx + 3] = this.data[idx + 3] >> 1;
+const fs = require("fs");
+const path = require("path");
+
+const SHARP = require('sharp');
+const PNG = require('pngjs').PNG;
+
+let outFormat = 'color';
+
+if (process.argv.length < 3) {
+  console.log('Please provide source file!');
+  process.exit(1);
+}
+
+const sourceFile = process.argv[2];
+
+if (process.argv.length >3) {
+  outFormat = process.argv[3];
+  outFormat = outFormat === 'g' || outFormat === 'grey' ? 'grey' : 'color';
+}
+
+console.log('outFormat: ', outFormat);
+
+const filepath = path.dirname(sourceFile);
+const filename = path.basename(sourceFile);
+
+const basename = `bmout_${path.basename(filename, '.raw')}.png`;
+
+console.log(`Processing ${filepath}/${filename}`);
+
+if (filename.endsWith('.png')) {
+  SHARP(`${filepath}/${filename}`, {
+      channels: 1,
+  })
+    .toBuffer((err, rawBuffer, info) => {
+      if (info.channels > 1) {
+        console.log('Only processing greyscale png, meaning only one channel!');
+        process.exit(1);
       }
+      const pngBuffer = Buffer.alloc(3 * info.width * info.height);
+      let rawScale = 2;
+      let pngScale = 3;
+
+      for (let i = 0; i < info.width * info.height; i++) {
+        pngBuffer[i * pngScale] = rawBuffer[i * rawScale];
+        pngBuffer[i * pngScale + 1] = rawBuffer[i * rawScale + 1];
+        pngBuffer[i * pngScale + 2] = 0;
+      }
+
+      const outConfig = {
+        raw: {
+          width: info.width,
+          height: info.height,
+          channels: 3,
+        },
+      };
+
+      SHARP(pngBuffer, outConfig)
+        .png()
+        .resize(resolution, resolution)
+        .toFile(`${filepath}/bmout_${basename}`);
+    });
+} else if (filename.endsWith('.r16')||filename.endsWith('.raw')) {
+  fs.readFile(`${filepath}/${filename}`, (err, rawBuffer) => {
+    const bytedepth = 2;
+    const resolution = Math.sqrt(rawBuffer.length / bytedepth);
+
+    if (outFormat === 'color') {
+      writePNG_RGB({
+        width: resolution,
+        height: resolution,
+        buffer: rawBuffer,
+        file: `${filepath}/bmout_clr_${outname}`,
+      });
+    } else {
+      writePNG_GREY({
+        width: resolution,
+        height: resolution,
+        buffer: rawBuffer,
+        file: `${filepath}/bmout_gry_${outname}`,
+      });
     }
-    console.log(
-      this.data[Math.floor(this.data.length / 2)],
-      this.data[Math.floor(this.data.length / 2) + 1],
-      this.data[Math.floor(this.data.length / 2) + 2],
-      this.data[Math.floor(this.data.length / 2) + 3],
-      this.data[Math.floor(this.data.length / 2) + 4]
-    );
-    this.pack().pipe(fs.createWriteStream("out.png"));
   });
+} else {
+  console.log('unknown file format: ', `${filepath}/${filename}`);
+}
+
+function writePNG_RGB(data) {
+  const pngBuffer = Buffer.alloc(3 * data.width * data.height);
+  let rawScale = 2;
+  let pngScale = 3;
+  for (let i = 0; i < data.width * data.height; i++) {
+    pngBuffer[i * pngScale] = data.buffer[i * rawScale];
+    pngBuffer[i * pngScale + 1] = data.buffer[i * rawScale + 1];
+    pngBuffer[i * pngScale + 2] = 0;
+  }
+  const outImg = {
+    raw: {
+      width: data.width,
+      height: data.height,
+      channels: 3,
+    },
+  };
+
+  SHARP(pngBuffer, outImg)
+    .png()
+    .resize(data.width, data.height)
+    .toFile(data.file);
+
+}
+
+function writePNG_GREY(data) {
+  const outConfig = {
+    width: data.width,
+    height: data.height,
+    colorType: 0,
+    inputColorType: 0,
+    inputHasAlpha: false,
+    bitDepth: 16,
+    filterType: -1,
+  }
+
+  const outImg = new PNG(outConfig);
+/*
+  let min = 255;
+  for (let i = 0; i < Math.floor(rawBuffer.length * 0.5); i++) {
+    min = Math.min(rawBuffer[i * 2 + 1], min);
+  }
+  console.log(min);
+
+  for (let i = 0; i < Math.floor(rawBuffer.length * 0.5); i++) {
+    // rawBuffer[i * 2] *= 0.25; // lower bit (height from step to step)
+    rawBuffer[i * 2 + 1] -= min; // heigher bit (overlall height)
+  }
+*/
+  outImg.data = data.buffer;
+  outImg.pack().pipe(fs.createWriteStream(data.file));
+}
