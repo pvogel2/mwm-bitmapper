@@ -3,7 +3,7 @@ var express = require('express');
 
 var app = express();
 
-app.get('/', (req, res) => res.sendFile(__dirname + '/res/html/index.html'));
+app.get('/', (req, res) => res.sendFile(__dirname + '/public/index.html'));
 
 app.use('/res/js/three/', express.static('node_modules/three/'));
 app.use('/res/js/mwm/', express.static('node_modules/mwm-renderer/dist/'));
@@ -12,6 +12,8 @@ app.use('/res/js/pngjs/', express.static('node_modules/pngjs/'));
 app.use('/res/js/assets/', express.static('res/js/'));
 app.use('/res/css/', express.static('res/css/'));
 app.use('/res/img/', express.static('res/img/'));
+
+app.use('/dist/', express.static('build/'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

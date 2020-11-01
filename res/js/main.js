@@ -101,6 +101,6 @@ window.addEventListener('DOMContentLoaded', () => {
     renderer.addAxes(1);
     addLight(renderer);
     renderer.start();
-//    fetchImage('/res/img/bmout_unityisland.png', true);
-    fetchImage('/res/img/untitled.png', true);
+    fetchImage('/res/img/bmout_unrealisland01.png', true);
+    // fetchImage('/res/img/untitled.png', true);
 });
