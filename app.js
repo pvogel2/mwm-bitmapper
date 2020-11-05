@@ -1,6 +1,7 @@
 var createError = require('http-errors');
 var express = require('express');
-var multer  = require('multer')
+var multer  = require('multer');
+const uploadRouter = require('./lib.js/routes/upload-router'); 
 
 var storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -15,6 +16,8 @@ var upload = multer({ storage })
 var app = express();
 
 app.get('/', (req, res) => res.sendFile(__dirname + '/public/index.html'));
+
+app.use(uploadRouter);
 
 app.post('/upload', upload.single('file'), (req, res) => {
   console.log('Data:', req.file, req.body);

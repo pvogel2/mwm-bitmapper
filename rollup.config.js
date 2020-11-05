@@ -2,11 +2,12 @@ import babel from "@rollup/plugin-babel";
 import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
 import replace from "@rollup/plugin-replace";
+import rollup from "rollup";
 
 const NODE_ENV = process.env.NODE_ENV || "development";
 const outputFile = NODE_ENV === "production" ? "./lib/prod.js" : "./lib/dev.js";
 
-export default {
+const config = {
   input: "./src/js/index.js",
   output: {
     file: './build/lib/dev.js',
@@ -31,3 +32,7 @@ export default {
     'react-dom',
   ], // do not include peer dependencies in the bundle file
 };
+
+const watcher = rollup.watch(config);
+
+export default config;
