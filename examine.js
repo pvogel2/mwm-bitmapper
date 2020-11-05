@@ -54,6 +54,7 @@ if (filename.endsWith('.png')) {
         },
       };
 
+      console.log(`write to ${filepath}/bmout_${basename}`);
       SHARP(pngBuffer, outConfig)
         .png()
         .resize(resolution, resolution)
@@ -65,18 +66,20 @@ if (filename.endsWith('.png')) {
     const resolution = Math.sqrt(rawBuffer.length / bytedepth);
 
     if (outFormat === 'color') {
+      console.log(`write to ${filepath}/bmout_clr_${basename}`);
       writePNG_RGB({
         width: resolution,
         height: resolution,
         buffer: rawBuffer,
-        file: `${filepath}/bmout_clr_${outname}`,
+        file: `${filepath}/bmout_clr_${basename}`,
       });
     } else {
+      console.log(`write to ${filepath}/bmout_gry_${basename}`);
       writePNG_GREY({
         width: resolution,
         height: resolution,
         buffer: rawBuffer,
-        file: `${filepath}/bmout_gry_${outname}`,
+        file: `${filepath}/bmout_gry_${basename}`,
       });
     }
   });

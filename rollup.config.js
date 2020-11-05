@@ -7,20 +7,27 @@ const NODE_ENV = process.env.NODE_ENV || "development";
 const outputFile = NODE_ENV === "production" ? "./lib/prod.js" : "./lib/dev.js";
 
 export default {
-  input: "./src/js/index.mjs",
+  input: "./src/js/index.js",
   output: {
     file: './build/lib/dev.js',
-    format: "cjs",
+    format: "iife",
+    globals: {
+      'react': 'React',
+      'react-dom': 'ReactDOM'
+    },
   },
   plugins: [
-    replace({ // use node env variables in js
-      "process.env.NODE_ENV": JSON.stringify(NODE_ENV)
-    }),
+    resolve({ browser: true }), // resolve node modules needed to include in bundle
     babel({ // use bable to transpile js
       exclude: "node_modules/**",
     }),
     commonjs(), // ensure correct handling of es6 modules
-    resolve({ browser:true }), // resolve node modules needed to include in bundle
+    replace({ // use node env variables in js
+      "process.env.NODE_ENV": JSON.stringify(NODE_ENV)
+    }),
   ],
-  external: id => /^react|styled-jsx/.test(id), // do not include peer dependencies in the bundle file
+  external: [
+    'react',
+    'react-dom',
+  ], // do not include peer dependencies in the bundle file
 };

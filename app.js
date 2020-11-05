@@ -1,13 +1,32 @@
 var createError = require('http-errors');
 var express = require('express');
+var multer  = require('multer')
+
+var storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, './uploads');
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  }
+});
+var upload = multer({ storage })
 
 var app = express();
 
 app.get('/', (req, res) => res.sendFile(__dirname + '/public/index.html'));
 
+app.post('/upload', upload.single('file'), (req, res) => {
+  console.log('Data:', req.file, req.body);
+  res.end('{"result": "ok"}');
+});
+
 app.use('/res/js/three/', express.static('node_modules/three/'));
 app.use('/res/js/mwm/', express.static('node_modules/mwm-renderer/dist/'));
 app.use('/res/js/pngjs/', express.static('node_modules/pngjs/'));
+
+app.use('/res/js/react/', express.static('node_modules/react/'));
+app.use('/res/js/react-dom/', express.static('node_modules/react-dom/'));
 
 app.use('/res/js/assets/', express.static('res/js/'));
 app.use('/res/css/', express.static('res/css/'));
