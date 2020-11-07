@@ -5,7 +5,8 @@
   "scripts": {
     "start": "nodemon index.js",
     "examine": "node examine.js",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "watch": "rollup -c --watch"
   },
   "dependencies": {
     "@material-ui/core": "^4.11.0",
