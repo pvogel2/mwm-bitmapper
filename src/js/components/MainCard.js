@@ -50,6 +50,7 @@ export default function MainCard(props) {
     return () => document.removeEventListener('keydown', handleKeyDown, false);
   }, []);
 
+  const onUpload = (result) => {};
   const classes = useStyles();
 
   if (!dialogOpen) return null;
@@ -73,8 +74,23 @@ export default function MainCard(props) {
         subheader="Upload and process heightmap."
       />
       <CardContent className={classes.root}>
-        <Upload/>
+        <Upload onUpload={ onUpload }/>
       </CardContent>
     </Card>
   );
 };
+
+function mapStateToProps(state) {
+  return {
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(MainCard);

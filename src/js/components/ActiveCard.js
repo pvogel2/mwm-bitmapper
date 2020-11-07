@@ -9,8 +9,8 @@ const useStyles = makeStyles((theme) => ({
   card: {
     minWidth: 275,
     position: 'absolute',
-    top: '30px',
-    right: '30px',
+    top: '230px',
+    left: '30px',
   },
   avatar: {
     backgroundColor: theme.palette.secondary.main,
@@ -23,9 +23,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
   
-function MainCard(props) {
+function ActiveCard(props) {
   const { heightmap } = props;
-
+  console.log('heightmap', heightmap);
   const classes = useStyles();
 
   return (
@@ -33,9 +33,9 @@ function MainCard(props) {
       <CardHeader
         avatar={
           <Avatar 
-            aria-label='map'
+            aria-label='active map'
             className={classes.avatar}>
-            M
+            A
           </Avatar>
         }
         title='Active map'
@@ -62,4 +62,4 @@ function mapDispatchToProps(dispatch) {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(MainCard);
+)(ActiveCard);

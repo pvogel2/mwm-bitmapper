@@ -17,8 +17,11 @@ var app = express();
 app.get('/', (req, res) => res.sendFile(__dirname + '/public/index.html'));
 
 app.post('/upload', upload.single('file'), (req, res) => {
-  console.log('Data:', req.file, req.body);
-  res.end('{"result": "ok"}');
+  res.json(`{"status":"ok", "result": ${req.file}`);
+});
+
+app.get('/mapped', (req, res) => {
+  req.json('{"status":"error"}');
 });
 
 app.use('/res/js/three/', express.static('node_modules/three/'));
