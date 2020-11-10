@@ -7,6 +7,7 @@ import CardHeader from '@material-ui/core/CardHeader';
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
+import { connect } from 'react-redux';
 
 import Upload from './Upload';
 
@@ -28,7 +29,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
   
-export default function MainCard(props) {
+function MainCard(props) {
+  const { sourcefile } = props;
+
+  const sourePath = '/uploaded';
   let toggleDialog = false;
 
   const [dialogOpen, setDialogOpen] = useState(true);
@@ -75,6 +79,7 @@ export default function MainCard(props) {
       />
       <CardContent className={classes.root}>
         <Upload onUpload={ onUpload }/>
+        { sourcefile && <img width='300px' src={`${sourePath}/${sourcefile}`} /> }
       </CardContent>
     </Card>
   );
@@ -82,6 +87,7 @@ export default function MainCard(props) {
 
 function mapStateToProps(state) {
   return {
+    sourcefile: state.sourcefile,
   }
 }
 

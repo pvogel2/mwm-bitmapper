@@ -94,6 +94,7 @@ function addLight(renderer) {
     renderer.addObject('sun', sun);
 }
 window.addEventListener('DOMContentLoaded', () => {
+    return;
     renderer = new mwm.Renderer({
         parentSelector: '#threejscontainer',
         control: true,

@@ -1,9 +1,9 @@
 
 import { connect } from 'react-redux';
-import { setHeightmap } from '../store/actions.js';
+import { setSourcefile, setHeightmap } from '../store/actions.js';
 
 function Upload(props) {
-  const { setHeightmap } = props;
+  const { setHeightmap, setSourcefile } = props;
 
   function onChange(event) {
     const formData = new FormData();
@@ -17,7 +17,8 @@ function Upload(props) {
       response => response.json() // if the response is a JSON object
     ).then(
       success => {
-        console.log(success); // Handle the success response object
+        console.log('success',success); // Handle the success response object
+        setSourcefile(success.filename);
         setHeightmap('');
         return success;
       }
@@ -37,6 +38,7 @@ function mapStateToProps(state) {
   function mapDispatchToProps(dispatch) {
     return {
       setHeightmap: heightmap => dispatch(setHeightmap(heightmap)),
+      setSourcefile: sourcefile => dispatch(setSourcefile(sourcefile)),
     }
   }
   

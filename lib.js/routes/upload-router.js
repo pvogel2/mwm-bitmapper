@@ -1,9 +1,12 @@
+const path = require('path');
 const express = require('express');
-const multer  = require('multer')
+const multer  = require('multer');
+
+const uploadDir = path.join(__dirname, '../../data/uploads');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, './uploads');
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     cb(null, file.originalname);
@@ -12,6 +15,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage })
 
 const router = express.Router();
+
+router.use('/uploaded', express.static(uploadDir));
 
 router.post('/upload', upload.single('file'), (req, res) => {
   console.log('Data:', req.file, req.body);
