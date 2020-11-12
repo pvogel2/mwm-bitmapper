@@ -58,42 +58,51 @@ function calcHeightmap(sourceFile) {
 
   /*+++++++++++++++++++++++*/
   if (sourceFile.endsWith('.png')) {
-    return SHARP(`${sourcePath}/${sourceFile}`)
-    .toBuffer((err, rawBuffer, info) => {
-      console.log('info', info);
-      /*if (info.channels > 1) {
-        console.log('Only processing greyscale png, meaning only one channel!');
-        process.exit(1);
-      }*/
+    console.log('convert PNG', `${sourcePath}/${sourceFile}`);
+    const p = new Promise((resolve, reject) => {
+      SHARP(`${sourcePath}/${sourceFile}`)
+      .toBuffer((err, rawBuffer, info) => {
+        console.log(err, 'info:', info);
+        if (info.channels > 1) {
+          console.log('Only processing greyscale png, meaning only one channel!');
+          process.exit(1);
+        }
 
 
-      const pngBuffer = Buffer.alloc(3 * info.width * info.height);
-      let rawScale = 2;
-      let pngScale = 3;
+        const pngBuffer = Buffer.alloc(3 * info.width * info.height);
+        let rawScale = 2;
+        let pngScale = 3;
 
-      for (let i = 0; i < info.width * info.height; i++) {
-        pngBuffer[i * pngScale] = rawBuffer[i * rawScale];
-        pngBuffer[i * pngScale + 1] = rawBuffer[i * rawScale + 1];
-        pngBuffer[i * pngScale + 2] = 0;
-      }
+        for (let i = 0; i < info.width * info.height; i++) {
+          pngBuffer[i * pngScale] = rawBuffer[i * rawScale];
+          pngBuffer[i * pngScale + 1] = rawBuffer[i * rawScale + 1];
+          pngBuffer[i * pngScale + 2] = 0;
+        }
 
-      const outConfig = {
-        raw: {
-          width: info.width,
-          height: info.height,
-          channels: 3,
-        },
-      };
+        const outConfig = {
+          raw: {
+            width: info.width,
+            height: info.height,
+            channels: 3,
+          },
+        };
 
-      console.log(`write to ${targetFile}`);
-      SHARP(pngBuffer, outConfig)
-        .png()
-        .resize(info.width, info.height)
-        .toFile(`${targetFile}`);
+        console.log(`write to ${targetFile}`);
+        SHARP(pngBuffer, outConfig)
+          .png()
+          // .resize(info.width, info.height)
+          .toFile(`${targetFile}`)
+          .then((result) =>{
+            resolve('ok)');
+          });
       });
+    });
+    return p;
     /*+++++++++++++++++++++++*/
   }
 
+
+  console.log('convert RAW');
   return new Promise((resolve, reject) => {
     fs.readFile(`${sourcePath}/${sourceFile}`, (err, rawBuffer) => {
       if (err) {
@@ -103,7 +112,7 @@ function calcHeightmap(sourceFile) {
       const bytedepth = 2;
       const resolution = Math.sqrt(rawBuffer.length / bytedepth);
   
-      console.log(`write to ${targetFile}`);
+      console.log(`write to ${targetFile}, (${resolution})`);
       writePNG_RGB({
         width: resolution,
         height: resolution,

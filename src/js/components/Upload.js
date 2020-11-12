@@ -17,7 +17,7 @@ function Upload(props) {
       response => response.json() // if the response is a JSON object
     ).then(
       success => {
-        console.log('success',success); // Handle the success response object
+        console.log('upload result',success); // Handle the success response object
         setSourcefile(success.filename);
         setHeightmap('');
         return success;
