@@ -23,7 +23,7 @@ class Renderer extends React.Component {
       fov: 45,
       cameraNear: 0.01,
       cameraFar: 2000,
-      position: {x: 0, y: 15, z: 70},
+      position: {x: 0, y: 1024, z: 1024},
       target: {x: 0, y: 0, z: 0},
       parentSelector: `#${this.state.parentId}`,
       control: true,
@@ -40,7 +40,7 @@ class Renderer extends React.Component {
 
   addLight() {
     const sun = new THREE.DirectionalLight( 0x666666, 2, 1000 );
-    sun.position.set(-400, 400, 0);
+    sun.position.set(-1500, 1500, -1500);
     sun.castShadow = true;
     sun.target.position.set(0, 0, 0);
 
@@ -48,7 +48,7 @@ class Renderer extends React.Component {
     sun.shadow.mapSize.width = 2048;  // default
     sun.shadow.mapSize.height = 2048; // default
     sun.shadow.camera.near = 0.05;       // default
-    sun.shadow.camera.far = 1500;
+    sun.shadow.camera.far = 2000;
     var d = 1500;// default
     sun.shadow.camera.left = - d;
     sun.shadow.camera.right = d;
@@ -78,6 +78,7 @@ class Renderer extends React.Component {
       vertexShader:   vertexshader,
       fragmentShader: fragmentshader,
       lights: true,
+      // side: THREE.DoubleSide,
     });
     return this.material;
     // return new THREE.MeshLambertMaterial( {color: 0x444444, map: null, wireframe: true, side: THREE.DoubleSide});
@@ -121,10 +122,10 @@ class Renderer extends React.Component {
     for (let h = 0; h < height; h++) {
       for (let w = 0; w < width; w++) {
           const idx = h * width + w;
-          position.push(w - 0.5 * width, h - 0.5 * height, data[idx]);
+          position.push(w - 0.5 * width, data[idx], h - 0.5 * height);
           if (w < width - 1 && h < height - 1) {
-              indices.push(idx, idx + 1, idx + width);
-              indices.push(idx + 1, idx + width + 1, idx + width);
+              indices.push(idx, idx + width, idx + 1);
+              indices.push(idx + 1, idx + width, idx + width + 1);
           }
       }
     }
@@ -138,17 +139,29 @@ class Renderer extends React.Component {
     this.mesh = new THREE.Mesh( geo, material );
     this.state.offset = -minValue;
     this.mesh.position.y = -minValue;
-    this.mesh.rotation.x = Math.PI * -0.5;
+    // this.mesh.rotation.x = Math.PI * 0.5;
     // const offset = maxValue - minValue;
-    console.log(this.mesh.position, minValue, maxValue);
     this.renderer.addObject(`themesh${Math.random()}`, this.mesh);
   }
 
-  onControlsChange(data) { 
-    this.material.uniforms.scale.value = data.scale;
-    this.mesh.position.y = this.state.offset * data.scale;
-    this.material.uniformsNeedUpdate = true;
-    // this.mesh.geometry.computeVertexNormals();
+  onControlsChange(data) {
+    if (this.material.uniforms.scale.value !== data.scale) {
+      this.material.uniforms.scale.value = data.scale;
+      this.mesh.position.y = this.state.offset * data.scale;
+      this.material.uniformsNeedUpdate = true;
+    }
+
+    if (this.material.wireframe !== data.wireframe) {
+      this.material.wireframe = data.wireframe;
+      this.material.needUpdate = true;
+    };
+
+    if (!!this.material.map !== data.texture) {
+      console.log('todo: texture', data.texture);
+      // const texture = this.textureLoader.load(UV_JPG);
+      // texture.wrapS = THREE.RepeatWrapping;
+      // texture.wrapT = THREE.RepeatWrapping;
+    }
   }
 
   addHeightmap() {// heightmap
@@ -204,14 +217,14 @@ uniform float scale;
 varying vec4 vColor;
 
 void main() {
-  vNormal = normalMatrix * normal;
+  vNormal = normalMatrix * normalize(vec3(normal.x * scale, normal.y, normal.z * scale));
   #if NUM_DIR_LIGHTS > 0
     directionalStrength = max(dot(vNormal, normalize(directionalLights[ 0 ].direction)), 0.0);
   #else
     directionalStrength = 1.;
   #endif
 
-  gl_Position = projectionMatrix * modelViewMatrix * vec4( position.x, position.y, position.z * scale, 1. );
+  gl_Position = projectionMatrix * modelViewMatrix * vec4( position.x, position.y * scale, position.z, 1. );
   vColor = vec4( color, 1. );
 }`;
 
@@ -220,7 +233,6 @@ varying vec4 vColor;
 varying float directionalStrength;
 
 vec3 directionalColor = vec3(0., 0., 0.);
-    
 #if ( NUM_DIR_LIGHTS > 0 )
   struct DirectionalLight {
     vec3 direction;

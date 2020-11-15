@@ -4,9 +4,11 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import { makeStyles } from '@material-ui/core/styles';
 import CardHeader from '@material-ui/core/CardHeader';
-import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Slider from '@material-ui/core/Slider';
+import Checkbox from '@material-ui/core/Checkbox';
 import Avatar from '@material-ui/core/Avatar';
 
 const useStyles = makeStyles((theme) => ({
@@ -23,7 +25,9 @@ const useStyles = makeStyles((theme) => ({
   root: {
   },
   formControl: {
-    margin: theme.spacing(3),
+    padding: theme.spacing(3),
+    boxSizing: 'border-box',
+    width: '100%',
   },
 }));
   
@@ -33,14 +37,36 @@ function RendererControls(props) {
   } = props;
 
   const [scale, setScale] = useState(1.0);
+  const [texture, setTexture] = useState(false);
+  const [wireframe, setWireframe] = useState(true);
 
   const classes = useStyles();
 
-  function handleScaleChange(event, scale) {
+  function handleTextureChange(event, _texture) {
     onChange({
       scale,
+      texture: _texture,
+      wireframe,
     });
-    setScale(scale);
+    setTexture(_texture);
+  }
+
+  function handleScaleChange(event, _scale) {
+    onChange({
+      scale: _scale,
+      texture,
+      wireframe,
+    });
+    setScale(_scale);
+  }
+
+  function handleWireframeChange(event, _wireframe) {
+    onChange({
+      scale: scale,
+      texture,
+      wireframe: _wireframe,
+    });
+    setWireframe(_wireframe);
   }
 
   return (
@@ -66,6 +92,16 @@ function RendererControls(props) {
             valueLabelDisplay="auto"
           />
         </FormControl>
+        <FormControlLabel
+          key={'textureCB'}
+          control={<Checkbox checked={texture} onChange={handleTextureChange} name='texture' />}
+          label={'use texture'}
+        />
+        <FormControlLabel
+          key={'wireframeCB'}
+          control={<Checkbox checked={wireframe} onChange={handleWireframeChange} name='wireframe' />}
+          label={'use wireframe'}
+        />
       </CardContent>
     </Card>
   );
