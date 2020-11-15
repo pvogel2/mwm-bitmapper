@@ -17,12 +17,12 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     top: '30px',
     left: '30px',
+    zIndex: 1,
   },
   avatar: {
     backgroundColor: theme.palette.secondary.main,
   },
   root: {
-    display: 'flex',
   },
   formControl: {
     margin: theme.spacing(3),
@@ -78,8 +78,13 @@ function MainCard(props) {
         subheader="Upload and process heightmap."
       />
       <CardContent className={classes.root}>
-        <Upload onUpload={ onUpload }/>
-        { sourcefile && <img width='300px' src={`${sourePath}/${sourcefile}`} /> }
+        <div>
+          <Upload onUpload={ onUpload } />
+        </div>
+        <br />
+        <div>
+          { sourcefile && <img width='300px' src={`${sourePath}/${sourcefile}`} /> }
+        </div>
       </CardContent>
     </Card>
   );

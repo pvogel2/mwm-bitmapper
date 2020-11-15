@@ -1,5 +1,5 @@
 let renderer = null;
-const OrbitControls = THREE.OrbitControls;
+// const OrbitControls = THREE.OrbitControls;
 
 let countMeshes = 0;
 function imageLoaded(merge, event) {

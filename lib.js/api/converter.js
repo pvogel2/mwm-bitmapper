@@ -30,21 +30,22 @@ function writePNG_RGB(data) {
     .toFile(data.file);
 }
 
-function writePNG_GREY(data) {
-  const outConfig = {
-    width: data.width,
-    height: data.height,
-    colorType: 0,
-    inputColorType: 0,
-    inputHasAlpha: false,
-    bitDepth: 16,
-    filterType: -1,
-  }
+function writeBuffer_RGB(data) {
+  const outImg = {
+    raw: {
+      width: data.width,
+      height: data.height,
+      channels: 3,
+    },
+  };
 
-  const outImg = new PNG(outConfig);
-
-  outImg.data = data.buffer;
-  outImg.pack().pipe(fs.createWriteStream(data.file));
+  /**
+   * returns a thenable function, handle result and error on your oun
+   */
+  return SHARP(data.buffer, outImg)
+    .png()
+    .resize(data.width, data.height)
+    .toFile(data.file);
 }
 
 function calcHeightmap(sourceFile) {
@@ -56,49 +57,52 @@ function calcHeightmap(sourceFile) {
   const targetName = `bmout_${basename}`;
   const targetFile = `${targetPath}/${targetName}`;
 
-  /*+++++++++++++++++++++++*/
   if (sourceFile.endsWith('.png')) {
     console.log('convert PNG', `${sourcePath}/${sourceFile}`);
+    let _meta = {};
     const p = new Promise((resolve, reject) => {
-      SHARP(`${sourcePath}/${sourceFile}`)
-      .toBuffer((err, rawBuffer, info) => {
-        console.log(err, 'info:', info);
-        if (info.channels > 1) {
-          console.log('Only processing greyscale png, meaning only one channel!');
-          process.exit(1);
+      fs.createReadStream(`${sourcePath}/${sourceFile}`)
+      .pipe(
+        new PNG({
+          colorType: 2,
+          depth: 16,
+          skipRescale: true,
+        })
+      ).on('metadata', function(metadata) {
+        _meta = metadata;
+      })
+      .on('parsed', function(data) {
+        const rawBuffer = Buffer.alloc(3 * this.width * this.height);
+        let rawIdx = 0;
+        for (var y = 0; y < this.height; y++) {
+          for (var x = 0; x < this.width; x++) {
+            var idx = (this.width * y + x) << 2;
+            const raw = data[idx];
+            rawBuffer[rawIdx] = Number(raw) & 0xff;
+            rawBuffer[rawIdx + 1] = raw>>8;
+            rawBuffer[rawIdx + 2] = 0;
+            rawIdx += 3;
+          }
         }
-
-
-        const pngBuffer = Buffer.alloc(3 * info.width * info.height);
-        let rawScale = 2;
-        let pngScale = 3;
-
-        for (let i = 0; i < info.width * info.height; i++) {
-          pngBuffer[i * pngScale] = rawBuffer[i * rawScale];
-          pngBuffer[i * pngScale + 1] = rawBuffer[i * rawScale + 1];
-          pngBuffer[i * pngScale + 2] = 0;
-        }
-
-        const outConfig = {
-          raw: {
-            width: info.width,
-            height: info.height,
-            channels: 3,
-          },
-        };
-
-        console.log(`write to ${targetFile}`);
-        SHARP(pngBuffer, outConfig)
-          .png()
-          // .resize(info.width, info.height)
-          .toFile(`${targetFile}`)
-          .then((result) =>{
-            resolve('ok)');
-          });
+        const resolution = this.width;
+        console.log(`write to ${targetFile}, (${resolution}), ${idx}, ${rawBuffer.length}`);
+        writeBuffer_RGB({
+          width: resolution,
+          height: resolution,
+          buffer: rawBuffer,
+          file: `${targetFile}`,
+        }).then((result) => {
+          resolve(Object.assign(result, { filename: targetName }));
+        })
+        .catch((err) => {
+          reject(err);
+        });
+          // this.pack().pipe(fs.createWriteStream(`${targetFile}`));
+        // console.log('resolve', _meta);
+        // resolve(_meta);
       });
     });
     return p;
-    /*+++++++++++++++++++++++*/
   }
 
 

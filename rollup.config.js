@@ -14,7 +14,8 @@ const config = {
     format: "iife",
     globals: {
       'react': 'React',
-      'react-dom': 'ReactDOM'
+      'react-dom': 'ReactDOM',
+      'three': 'THREE',
     },
   },
   plugins: [
@@ -30,6 +31,7 @@ const config = {
   external: [
     'react',
     'react-dom',
+    'three',
   ], // do not include peer dependencies in the bundle file
 };
 

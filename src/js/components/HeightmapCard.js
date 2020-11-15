@@ -12,6 +12,7 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     top: '30px',
     right: '30px',
+    zIndex: 1,
   },
   avatar: {
     backgroundColor: theme.palette.secondary.main,
@@ -26,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   
 function HeightmapCard(props) {
   const { heightmap, sourcefile, setHeightmap } = props;
-  console.log('heightmap card:', props);
+
   const classes = useStyles();
 
   if (sourcefile && !heightmap) {
@@ -64,7 +65,7 @@ function HeightmapCard(props) {
           </Avatar>
         }
         title='Height map'
-        subheader={`from ${sourcefile}`}
+        subheader={ heightmap }
       />
       <CardContent className={classes.root}>
       { heightmap && <img width='300px' src={`/converted/${heightmap}`} /> }

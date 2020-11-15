@@ -7,6 +7,4 @@ if (process.argv.length < 3) {
 
 const sourceFile = process.argv[2];
 
-console.log('sourceFile: ', sourceFile);
-
 CONVERTER.calcHeightmap(sourceFile);
