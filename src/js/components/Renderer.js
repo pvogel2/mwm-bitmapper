@@ -14,6 +14,7 @@ class Renderer extends React.Component {
       offset: 0,
     }
 
+    this.canvas = null;
     this.material = null;
     this.mesh = null;
   }
@@ -65,8 +66,11 @@ class Renderer extends React.Component {
       THREE.UniformsLib[ "lights" ]
     ] );
   
-  
+    const texture = this.renderer.getTexture(this.canvas.toDataURL('image/png'));
+ 
     uniforms.scale = {type: "f", value: 1.0};
+    uniforms.heightmap = {type: "t", value: texture};
+    uniforms.usemap = {type: "f", value: 0.0};
 
     this.material = new THREE.ShaderMaterial( {
       uniforms: uniforms,
@@ -95,7 +99,9 @@ class Renderer extends React.Component {
     c.style.border = '1px solid white';
     c.width = width;
     c.height = height;
-    //document.body.appendChild(c);
+
+    this.canvas = c;
+
     const ctx = c.getContext( '2d' );
     ctx.drawImage(img, 0, 0);
 
@@ -119,9 +125,11 @@ class Renderer extends React.Component {
 
     const position = [];
     const indices = [];
+    const uvs = [];
     for (let h = 0; h < height; h++) {
       for (let w = 0; w < width; w++) {
           const idx = h * width + w;
+          uvs.push(w / width, 1 - h / height);
           position.push(w - 0.5 * width, data[idx], h - 0.5 * height);
           if (w < width - 1 && h < height - 1) {
               indices.push(idx, idx + width, idx + 1);
@@ -132,6 +140,7 @@ class Renderer extends React.Component {
     const geo  = new THREE.BufferGeometry();
     geo.setIndex( indices );
     geo.setAttribute( 'position', new THREE.Float32BufferAttribute( position, 3 ) );
+    geo.setAttribute( 'uv', new THREE.Float32BufferAttribute( uvs, 2 ) );
     geo.computeVertexNormals();
 
     const material = this.getMaterial();
@@ -139,8 +148,6 @@ class Renderer extends React.Component {
     this.mesh = new THREE.Mesh( geo, material );
     this.state.offset = -minValue;
     this.mesh.position.y = -minValue;
-    // this.mesh.rotation.x = Math.PI * 0.5;
-    // const offset = maxValue - minValue;
     this.renderer.addObject(`themesh${Math.random()}`, this.mesh);
   }
 
@@ -156,15 +163,24 @@ class Renderer extends React.Component {
       this.material.needUpdate = true;
     };
 
-    if (!!this.material.map !== data.texture) {
-      console.log('todo: texture', data.texture);
-      // const texture = this.textureLoader.load(UV_JPG);
-      // texture.wrapS = THREE.RepeatWrapping;
-      // texture.wrapT = THREE.RepeatWrapping;
-    }
+    // if (!!this.material.uniforms.usemap.value !== data.texture) {
+      this.material.uniforms.usemap.value = data.texture ? 1.0 : 0.0;
+      this.material.uniformsNeedUpdate = true;
+    // }
+
+    /* if (!!this.material.map !== data.texture) {
+      if (data.texture) {
+        const texture = this.renderer.getTexture(this.canvas.toDataURL('image/png'));
+        console.log(texture);
+        this.material.map = texture;
+      } else {
+        this.material.map = null;
+      }
+      this.material.needUpdate = true;
+    } */
   }
 
-  addHeightmap() {// heightmap
+  addHeightmap() {
     const img = new Image();
     img.addEventListener('load', this.heightmapLoaded.bind(this, img));
     img.src = `/converted/${this.props.heightmap}`;
@@ -204,6 +220,7 @@ attribute vec3 color;
 varying vec3 vNormal;
 varying float directionalStrength;
 uniform float scale;
+varying vec2 vUV;
 
 #if NUM_DIR_LIGHTS > 0
   struct DirectionalLight {
@@ -226,11 +243,15 @@ void main() {
 
   gl_Position = projectionMatrix * modelViewMatrix * vec4( position.x, position.y * scale, position.z, 1. );
   vColor = vec4( color, 1. );
+  vUV = uv;
 }`;
 
 const fragmentshader = `
 varying vec4 vColor;
 varying float directionalStrength;
+uniform sampler2D heightmap;
+uniform float usemap;
+varying vec2 vUV;
 
 vec3 directionalColor = vec3(0., 0., 0.);
 #if ( NUM_DIR_LIGHTS > 0 )
@@ -251,6 +272,10 @@ void main() {
     }
     #pragma unroll_loop_end
   #endif
-
-  gl_FragColor = vec4(vColor.rgb * directionalColor, 1.);
+  vec3 colo = vec3(vColor.rgb);
+  if (usemap > 0.0) {
+    vec4 inputSample = texture2D( heightmap, vUV );
+    colo = vec3(inputSample.rgb); 
+  }
+  gl_FragColor = vec4(colo * directionalColor, 1.);
 }`;
