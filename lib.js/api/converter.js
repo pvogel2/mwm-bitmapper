@@ -48,20 +48,21 @@ function writeBuffer_RGB(data) {
     .toFile(data.file);
 }
 
-function calcHeightmap(sourceFile) {
-  const sourcePath = 'data/uploads';
-  const targetPath = 'data/converted';
-  const basename = `${path.basename(sourceFile, '.raw')}.png`;
+function calcHeightmap(sourceFile, taregetFile) {
+  const sourcePath = path.dirname(sourceFile);
+  const targetPath = path.dirname(taregetFile);
 
+  const extname = path.extname(sourcePath);
+  const basename = `${path.basename(sourceFile, extname)}.png`;
 
   const targetName = `bmout_${basename}`;
   const targetFile = `${targetPath}/${targetName}`;
 
-  if (sourceFile.endsWith('.png')) {
-    console.log('convert PNG', `${sourcePath}/${sourceFile}`);
+  if (extname === '.png') {
+    console.log('convert PNG', sourceFile);
     let _meta = {};
     const p = new Promise((resolve, reject) => {
-      fs.createReadStream(`${sourcePath}/${sourceFile}`)
+      fs.createReadStream(sourceFile)
       .pipe(
         new PNG({
           colorType: 2,

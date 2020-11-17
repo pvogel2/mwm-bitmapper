@@ -87,6 +87,7 @@ function RendererControls(props) {
           <Slider
             min={0.0}
             max={5.0}
+            step={0.01}
             value={scale}
             onChange={handleScaleChange}
             valueLabelDisplay="auto"

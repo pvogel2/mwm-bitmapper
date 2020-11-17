@@ -3,17 +3,20 @@ const express = require('express');
 var bodyParser = require('body-parser');
 const converter = require('../api/converter');
 // const uploadDir = path.join(__dirname, '../../data/uploads');
-const convertDir = path.join(__dirname, '../../data/converted');
+const targetPath = path.join(__dirname, '../../data/converted');
+const sourcePath = 'data/uploads';
 
 const router = express.Router();
 
 const jsonParser = bodyParser.json();
 
-router.use('/converted', express.static(convertDir));
+router.use('/converted', express.static(targetPath));
 
 router.post('/convert', jsonParser, async (req, res, next) => {
-  const result = await converter.calcHeightmap(req.body.sourcefile);
-  console.log('result', result);
+  const fileName = req.body.sourcefile;
+  const sourceFile = `${data/uploads}/${fileName}`;
+  const targetFile = `${targetPath}/test`;
+  const result = await converter.calcHeightmap(sourceFile, targetFile);
   res.json(result);
 });
 
