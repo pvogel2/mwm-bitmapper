@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "start": "nodemon index.js",
-    "examine": "node examine.js",
     "build": "rollup -c",
-    "watch": "rollup -c --watch"
+    "watch": "rollup -c --watch",
+    "dev": "rollup -c --watch && nodemon index.js"
   },
   "dependencies": {
     "@material-ui/core": "^4.11.0",
