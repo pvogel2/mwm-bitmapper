@@ -1,20 +1,42 @@
 const path = require('path');
 const CONVERTER = require('./lib.js/api/converter');
 
-if (process.argv.length < 3) {
-  console.log('Please provide source file!');
+const args = process.argv.slice(2);
+console.log(process.env.NODE_ENV);
+/**
+ * konwn parameter names
+ */
+let sourceFile = ''; // required
+let targetFile = ''; // optional
+let debug = null; // optional
+
+for (let i = 0; i  < args.length; i += 2) {
+  const key = args[i];
+  const value = args[i+1];
+
+  switch(key) {
+    case '-i':
+    case '--in':
+      sourceFile = value;
+      break;
+    case '-o':
+    case '--out':
+      targetFile = value;
+      break;
+    default: {
+      console.log(`unknown parameter ${key}, exiting`);
+      process.exit(1);
+    }
+  }
+}
+
+if (!sourceFile) {
+  console.log('missing source or target');
   process.exit(1);
 }
 
-const sourceFile = process.argv[2];
 const extName = path.extname(sourceFile);
-const targetName = `bmout_${path.basename(sourceFile, extName)}.png`;
+const targetName = path.basename(targetFile) || `bmout_${path.basename(sourceFile, extName)}.png`;
+const targetPath = path.dirname(targetFile) || '';
 
-console.log('targetName', targetName);
-if (process.argv.length < 4) {
-  console.log(`No target file name provided, write to ${targetName}`);
-} else {
-  targetFile = process.argv[3]; 
-}
-
-CONVERTER.calcHeightmap(sourceFile, targetName);
+CONVERTER.calcHeightmap(sourceFile, path.join(targetPath, targetName));
