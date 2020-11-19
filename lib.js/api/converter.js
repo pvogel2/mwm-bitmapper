@@ -48,17 +48,11 @@ function writeBuffer_RGB(data) {
     .toFile(data.file);
 }
 
-function calcHeightmap(sourceFile, taregetFile) {
-  const sourcePath = path.dirname(sourceFile);
-  const targetPath = path.dirname(taregetFile);
+function calcHeightmap(sourceFile, targetFile) {
+  const extName = path.extname(sourceFile);
+  const targetName = path.basename(targetFile);
 
-  const extname = path.extname(sourcePath);
-  const basename = `${path.basename(sourceFile, extname)}.png`;
-
-  const targetName = `bmout_${basename}`;
-  const targetFile = `${targetPath}/${targetName}`;
-
-  if (extname === '.png') {
+  if (extName === '.png') {
     console.log('convert PNG', sourceFile);
     let _meta = {};
     const p = new Promise((resolve, reject) => {
@@ -91,16 +85,13 @@ function calcHeightmap(sourceFile, taregetFile) {
           width: resolution,
           height: resolution,
           buffer: rawBuffer,
-          file: `${targetFile}`,
+          file: targetFile,
         }).then((result) => {
           resolve(Object.assign(result, { filename: targetName }));
         })
         .catch((err) => {
           reject(err);
         });
-          // this.pack().pipe(fs.createWriteStream(`${targetFile}`));
-        // console.log('resolve', _meta);
-        // resolve(_meta);
       });
     });
     return p;
@@ -109,7 +100,7 @@ function calcHeightmap(sourceFile, taregetFile) {
 
   console.log('convert RAW');
   return new Promise((resolve, reject) => {
-    fs.readFile(`${sourcePath}/${sourceFile}`, (err, rawBuffer) => {
+    fs.readFile(`${sourceFile}`, (err, rawBuffer) => {
       if (err) {
         return new Promise.reject(err);
       };
@@ -122,7 +113,7 @@ function calcHeightmap(sourceFile, taregetFile) {
         width: resolution,
         height: resolution,
         buffer: rawBuffer,
-        file: `${targetFile}`,
+        file: targetFile,
       }).then((result) => {
         resolve(Object.assign(result, { filename: targetName }));
       })

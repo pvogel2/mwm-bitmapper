@@ -19,7 +19,7 @@ const router = express.Router();
 router.use('/uploaded', express.static(uploadDir));
 
 router.post('/upload', upload.single('file'), (req, res) => {
-  console.log('Data:', req.file, req.body);
+  console.log('Upload data:', req.file, req.body);
   res.json(req.file);
 });
 
