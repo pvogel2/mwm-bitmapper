@@ -68,7 +68,7 @@ const config = [
         { src: 'data', dest: 'build' },
       ]
     }),
-    run(),
+    NODE_ENV === 'development' && run(),
   ],
 },
 ];

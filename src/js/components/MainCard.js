@@ -59,6 +59,13 @@ function MainCard(props) {
 
   if (!dialogOpen) return null;
 
+  const getPreview = () => {
+    if (!sourcefile || !sourcefile.endsWith('.png')) {
+      return 'No preview available';
+    }
+    return ( <img width='300px' src={`${sourePath}/${sourcefile}`} /> );
+  };
+
   return (
     <Card className={classes.card}>
       <CardHeader
@@ -83,7 +90,7 @@ function MainCard(props) {
         </div>
         <br />
         <div>
-          { sourcefile && <img width='300px' src={`${sourePath}/${sourcefile}`} /> }
+          { getPreview() }
         </div>
       </CardContent>
     </Card>
