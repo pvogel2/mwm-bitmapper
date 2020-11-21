@@ -1,13 +1,14 @@
 var createError = require('http-errors');
 var express = require('express');
 
-const uploadRouter = require('./lib.js/routes/upload-router'); 
-const convertRouter = require('./lib.js/routes/convert-router'); 
+const uploadRouter = require('./routes/upload-router'); 
+const convertRouter = require('./routes/convert-router'); 
 
 var app = express();
 
 app.get('/', (req, res) => res.sendFile(__dirname + '/public/index.html'));
 
+console.log(__dirname);
 app.use(uploadRouter);
 app.use(convertRouter);
 
@@ -18,11 +19,7 @@ app.use('/res/js/pngjs/', express.static('node_modules/pngjs/'));
 app.use('/res/js/react/', express.static('node_modules/react/'));
 app.use('/res/js/react-dom/', express.static('node_modules/react-dom/'));
 
-app.use('/res/js/assets/', express.static('res/js/'));
-app.use('/res/css/', express.static('res/css/'));
-app.use('/res/img/', express.static('res/img/'));
-
-app.use('/dist/', express.static('build/'));
+app.use('/assets/', express.static(`${__dirname}/`));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
