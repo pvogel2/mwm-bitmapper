@@ -3,10 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon index.js",
     "build": "rollup -c",
-    "watch": "rollup -c --watch",
-    "dev": "rollup -c --watch && nodemon index.js"
+    "watch": "rollup -c --watch"
   },
   "dependencies": {
     "@material-ui/core": "^4.11.0",

@@ -18,8 +18,7 @@ app.use('/res/js/pngjs/', express.static('node_modules/pngjs/'));
 
 app.use('/res/js/react/', express.static('node_modules/react/'));
 app.use('/res/js/react-dom/', express.static('node_modules/react-dom/'));
-
-app.use('/assets/', express.static(`${__dirname}/`));
+app.use('/assets/', express.static(`${__dirname}/assets/`));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

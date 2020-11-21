@@ -58,20 +58,22 @@ const sections = [
 
 const options = clArgs(optionDefinitions);
 
-if (options.main.help) {
+const { main = {}, _none = {} } = options;
+
+if (main.help) {
   console.log(clUsage(sections));
   process.exit(0);
 };
 
-if (options._none.debug) {
+if (_none.debug) {
   process.env.DEBUG = true;
 };
 
-if (options._none.verbose) {
+if (_none.verbose) {
   process.env.VERBOSE = true;
 };
 
 module.exports = {
-  getSource: () => options.main.in,
-  getTarget: () => options.main.out,
+  getSource: () => main.in,
+  getTarget: () => main.out,
 };

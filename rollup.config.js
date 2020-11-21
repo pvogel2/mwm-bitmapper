@@ -4,14 +4,13 @@ import resolve from "@rollup/plugin-node-resolve";
 import replace from "@rollup/plugin-replace";
 import run from '@rollup/plugin-run';
 import copy from 'rollup-plugin-copy'
-import rollup from "rollup";
+// import rollup from 'rollup';
 
 const NODE_ENV = process.env.NODE_ENV || "development";
-const outputFile = NODE_ENV === "production" ? "./lib/prod.js" : "./lib/dev.js";
 
 const config = [
   { // converter api and cli
-    input: "./converter-cli.js",
+    input: "./lib.js/converter-cli.js",
     output: {
       file: './build/lib.js/converter-cli.js',
     },
@@ -66,6 +65,7 @@ const config = [
       targets: [
         { src: ['lib.js/app.js', 'lib.js/routes'], dest: 'build/dev' },
         { src: ['lib.js/api'], dest: 'build/dev' },
+        { src: 'data', dest: 'build' },
       ]
     }),
     run(),
