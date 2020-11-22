@@ -1,5 +1,6 @@
 
 import { connect } from 'react-redux';
+import Button from '@material-ui/core/Button';
 import { setSourcefile, setHeightmap } from '../store/actions.js';
 
 function Upload(props) {
@@ -17,7 +18,6 @@ function Upload(props) {
       response => response.json() // if the response is a JSON object
     ).then(
       success => {
-        console.log('upload result',success); // Handle the success response object
         setSourcefile(success.filename);
         setHeightmap('');
         return success;
@@ -27,7 +27,18 @@ function Upload(props) {
     );
   };
 
-  return <input type='file' name='file' onChange={onChange}/>;
+  return <Button
+    variant="contained"
+    component="label"
+  >
+    Upload File
+    <input
+      type="file"
+      hidden
+      onChange={onChange}
+      name='file'
+    />
+  </Button>
 };
 
 function mapStateToProps(state) {

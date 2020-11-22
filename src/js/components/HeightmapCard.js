@@ -5,6 +5,9 @@ import CardHeader from '@material-ui/core/CardHeader';
 import Avatar from '@material-ui/core/Avatar';
 import { setHeightmap } from '../store/actions.js';
 import { connect } from 'react-redux';
+import { useState, useEffect } from 'react';
+import FileInfo from './FileInfo';
+import MapPreview from './MapPreview';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -17,8 +20,12 @@ const useStyles = makeStyles((theme) => ({
   avatar: {
     backgroundColor: theme.palette.secondary.main,
   },
+  hightmapImage: {
+    backgroundColor: '#ccc',
+  },
   root: {
     display: 'flex',
+    flexDirection: 'column',
   },
   formControl: {
     margin: theme.spacing(3),
@@ -30,29 +37,34 @@ function HeightmapCard(props) {
 
   const classes = useStyles();
 
-  if (sourcefile && !heightmap) {
-    const data = {
-      sourcefile,
-    };
+  const [fileInfo, setFileInfo] = useState(null);
 
-    fetch('/convert', { // Your POST endpoint
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data), //
-    }).then(
-      response => response.json() // if the response is a JSON object
-    ).then(
-      success => {
-        console.log('success',success); // Handle the success response object
-        setHeightmap(success.filename);
-        return success;
-      }
-    ).catch(
-      error => console.log(error) // Handle the error response object
-    );
-  }
+  useEffect(async () => {
+    if (sourcefile && !heightmap) {      
+      const data = {
+        sourcefile,
+      };
+    
+      try {
+        const rawinfo = await fetch('/convert', { // Your POST endpoint
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data), //
+        });
+        if (!rawinfo.ok) {
+          throw new Error('fetch failed');
+        };
+        const fileinfo = await  rawinfo.json();
+
+        setFileInfo(fileinfo);
+        setHeightmap(fileinfo.filename);
+      } catch (err) {
+        console.log(err); // Handle the error response object
+      };
+    }
+  }, [sourcefile, heightmap]);
 
   return (
     <Card className={classes.card}>
@@ -68,7 +80,8 @@ function HeightmapCard(props) {
         subheader={ heightmap }
       />
       <CardContent className={classes.root}>
-      { heightmap && <img width='300px' src={`/converted/${heightmap}`} /> }
+        { heightmap && <MapPreview src={`/converted/${heightmap}`} /> }
+        { fileInfo && <FileInfo fileInfo={fileInfo} /> }
       </CardContent>
     </Card>
   );

@@ -37,6 +37,10 @@ const config = [
     resolve({ browser: true }), // resolve node modules needed to include in bundle
     babel({ // use bable to transpile js
       exclude: ['node_modules/**', 'lib.js/**'],
+      babelrc: false,
+      babelHelpers: 'runtime',
+      presets: ['@babel/preset-env', '@babel/preset-react'],
+      plugins: ['@babel/transform-runtime'],
     }),
     commonjs(), // ensure correct handling of es6 modules
     replace({ // use node env variables in js

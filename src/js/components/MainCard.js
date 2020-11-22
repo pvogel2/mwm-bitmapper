@@ -1,15 +1,20 @@
 import { useState, useEffect } from 'react';
 
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
+import { 
+  Card,
+  CardContent,
+  CardHeader,
+  Avatar,
+  IconButton,
+  Button,
+} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import CardHeader from '@material-ui/core/CardHeader';
-import Avatar from '@material-ui/core/Avatar';
-import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import { connect } from 'react-redux';
+import { setSourcefile, setHeightmap } from '../store/actions.js';
 
 import Upload from './Upload';
+import MapPreview from './MapPreview';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -30,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
 }));
   
 function MainCard(props) {
-  const { sourcefile } = props;
+  const { sourcefile, setSourcefile, setHeightmap } = props;
 
   const sourePath = '/uploaded';
   let toggleDialog = false;
@@ -49,6 +54,11 @@ function MainCard(props) {
     setDialogOpen(false);
   }
 
+  function onResetClick() {
+    setSourcefile('');
+    setHeightmap('');
+  }
+
   useEffect(() => {    
     document.addEventListener('keydown', handleKeyDown, false);
     return () => document.removeEventListener('keydown', handleKeyDown, false);
@@ -58,13 +68,6 @@ function MainCard(props) {
   const classes = useStyles();
 
   if (!dialogOpen) return null;
-
-  const getPreview = () => {
-    if (!sourcefile || !sourcefile.endsWith('.png')) {
-      return 'No preview available';
-    }
-    return ( <img width='300px' src={`${sourePath}/${sourcefile}`} /> );
-  };
 
   return (
     <Card className={classes.card}>
@@ -90,8 +93,9 @@ function MainCard(props) {
         </div>
         <br />
         <div>
-          { getPreview() }
+          <MapPreview src={`${sourePath}/${sourcefile}`} />
         </div>
+        <Button variant="contained" onClick={ onResetClick } >reset</Button>
       </CardContent>
     </Card>
   );
@@ -105,6 +109,8 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
+    setHeightmap: heightmap => dispatch(setHeightmap(heightmap)),
+    setSourcefile: sourcefile => dispatch(setSourcefile(sourcefile)),
   }
 }
 
