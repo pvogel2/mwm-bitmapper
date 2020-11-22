@@ -1,15 +1,19 @@
-import { useState, useEffect } from 'react';
-
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
+import { 
+  Card,
+  CardHeader,
+  CardContent,
+  CardActions,
+  Avatar,
+  IconButton,
+} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import CardHeader from '@material-ui/core/CardHeader';
-import Avatar from '@material-ui/core/Avatar';
-import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
+import UndoIcon from '@material-ui/icons/Undo';
 import { connect } from 'react-redux';
+import { setSourcefile, setHeightmap } from '../store/actions.js';
 
 import Upload from './Upload';
+import MapPreview from './MapPreview';
+import FileInfo from './FileInfo';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -30,41 +34,22 @@ const useStyles = makeStyles((theme) => ({
 }));
   
 function MainCard(props) {
-  const { sourcefile } = props;
+  const { sourcefile, setSourcefile, setHeightmap } = props;
 
   const sourePath = '/uploaded';
-  let toggleDialog = false;
 
-  const [dialogOpen, setDialogOpen] = useState(true);
-
-  function handleKeyDown(e) {
-    if (e.key !== 'm') return;
-
-    toggleDialog = !toggleDialog;
-    setDialogOpen(toggleDialog);
+  function onResetClick() {
+    setSourcefile('');
+    setHeightmap('');
   }
 
-  function onClose() {
-    toggleDialog = false;
-    setDialogOpen(false);
-  }
+  const onUpload = (result) => {
+    // alert(result);
+  };
 
-  useEffect(() => {    
-    document.addEventListener('keydown', handleKeyDown, false);
-    return () => document.removeEventListener('keydown', handleKeyDown, false);
-  }, []);
-
-  const onUpload = (result) => {};
   const classes = useStyles();
 
-  if (!dialogOpen) return null;
-
-  const getPreview = () => {
-    if (!sourcefile || !sourcefile.endsWith('.png')) {
-      return 'No preview available';
-    }
-    return ( <img width='300px' src={`${sourePath}/${sourcefile}`} /> );
-  };
+  const filepath = sourcefile ? `${sourePath}/${sourcefile}` : '';
 
   return (
     <Card className={classes.card}>
@@ -77,22 +62,20 @@ function MainCard(props) {
           </Avatar>
         }
         action={
-          <IconButton aria-label="Close" onClick={onClose}>
-            <CloseIcon />
+          <IconButton title="Reset" aria-label="Reset" onClick={onResetClick}>
+            <UndoIcon />
           </IconButton>
         }
         title="Main"
         subheader="Upload and process heightmap."
       />
       <CardContent className={classes.root}>
-        <div>
-          <Upload onUpload={ onUpload } />
-        </div>
-        <br />
-        <div>
-          { getPreview() }
-        </div>
+          <MapPreview src={filepath} />
+          <FileInfo fileInfo={{}} />
       </CardContent>
+      <CardActions>
+        <Upload onUpload={ onUpload } />
+      </CardActions>
     </Card>
   );
 };
@@ -105,6 +88,8 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
+    setHeightmap: heightmap => dispatch(setHeightmap(heightmap)),
+    setSourcefile: sourcefile => dispatch(setSourcefile(sourcefile)),
   }
 }
 

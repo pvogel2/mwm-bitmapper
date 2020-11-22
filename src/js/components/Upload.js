@@ -1,9 +1,10 @@
 
 import { connect } from 'react-redux';
+import Button from '@material-ui/core/Button';
 import { setSourcefile, setHeightmap } from '../store/actions.js';
 
 function Upload(props) {
-  const { setHeightmap, setSourcefile } = props;
+  const { setHeightmap, setSourcefile, onUpload = () => {} } = props;
 
   function onChange(event) {
     const formData = new FormData();
@@ -16,18 +17,29 @@ function Upload(props) {
     }).then(
       response => response.json() // if the response is a JSON object
     ).then(
-      success => {
-        console.log('upload result',success); // Handle the success response object
-        setSourcefile(success.filename);
+      fileinfo => {
+        setSourcefile(fileinfo.filename);
         setHeightmap('');
-        return success;
+        onUpload(fileinfo);
+        return fileinfo;
       }
     ).catch(
       error => console.log(error) // Handle the error response object
     );
   };
 
-  return <input type='file' name='file' onChange={onChange}/>;
+  return <Button
+    variant="contained"
+    component="label"
+  >
+    Upload File
+    <input
+      type="file"
+      hidden
+      onChange={onChange}
+      name='file'
+    />
+  </Button>
 };
 
 function mapStateToProps(state) {
