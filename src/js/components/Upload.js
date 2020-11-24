@@ -4,7 +4,7 @@ import Button from '@material-ui/core/Button';
 import { setSourcefile, setHeightmap } from '../store/actions.js';
 
 function Upload(props) {
-  const { setHeightmap, setSourcefile } = props;
+  const { setHeightmap, setSourcefile, onUpload = () => {} } = props;
 
   function onChange(event) {
     const formData = new FormData();
@@ -17,10 +17,11 @@ function Upload(props) {
     }).then(
       response => response.json() // if the response is a JSON object
     ).then(
-      success => {
-        setSourcefile(success.filename);
+      fileinfo => {
+        setSourcefile(fileinfo.filename);
         setHeightmap('');
-        return success;
+        onUpload(fileinfo);
+        return fileinfo;
       }
     ).catch(
       error => console.log(error) // Handle the error response object
