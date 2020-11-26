@@ -9,12 +9,16 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.secondary.main,
   },
   root: {
-    display: 'flex',
+  },
+  renderContainer: {
     position: 'relative',
+    width: '100%',
+    paddingBottom: '100%',
   },
   render: {
-    width: '1024px',
-    height: '1024px'
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
   },
   formControl: {
     margin: theme.spacing(3),
@@ -33,7 +37,9 @@ function RenderCard(props) {
   return (
     <Card>
       <CardContent className={classes.root}>
-        <Renderer  className={classes.render} />
+        <div className={classes.renderContainer}>
+         <Renderer  className={classes.render} />
+        </div>
       </CardContent>
     </Card>
   );

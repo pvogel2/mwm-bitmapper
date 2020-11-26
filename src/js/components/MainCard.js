@@ -9,6 +9,8 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import UndoIcon from '@material-ui/icons/Undo';
 import { connect } from 'react-redux';
+import { useState, useEffect } from 'react';
+
 import { setSourcefile, setHeightmap } from '../store/actions.js';
 
 import Upload from './Upload';
@@ -29,6 +31,8 @@ const useStyles = makeStyles((theme) => ({
 function MainCard(props) {
   const { sourcefile, setSourcefile, setHeightmap } = props;
 
+  const [fileInfo, setFileInfo] = useState(null);
+
   const sourePath = '/uploaded';
 
   function onResetClick() {
@@ -37,7 +41,7 @@ function MainCard(props) {
   }
 
   const onUpload = (result) => {
-    // alert(result);
+    setFileInfo(result);
   };
 
   const classes = useStyles();
@@ -64,7 +68,7 @@ function MainCard(props) {
       />
       <CardContent className={classes.root}>
           <MapPreview src={filepath} />
-          <FileInfo fileInfo={{}} />
+          { fileInfo && <FileInfo fileInfo={fileInfo} /> }
       </CardContent>
       <CardActions>
         <Upload onUpload={ onUpload } />

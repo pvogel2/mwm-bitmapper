@@ -1,10 +1,12 @@
-import { Table, TableRow, TableCell, TableContainer } from '@material-ui/core';
+import { Table, TableBody, TableRow, TableCell, TableContainer } from '@material-ui/core';
 
 function FileInfo(props) {
   const { fileInfo = {} } = props;
+  console.log('>>>', fileInfo);
 
   return <TableContainer>
     <Table aria-label="file info table">
+      <TableBody>
     <TableRow>
       <TableCell>name</TableCell>
       <TableCell align="right">{ fileInfo.filename || '-' }</TableCell>
@@ -21,6 +23,11 @@ function FileInfo(props) {
       <TableCell>size</TableCell>
       <TableCell align="right">{ `${fileInfo.size || '-'} b` }</TableCell>
     </TableRow>
+    <TableRow>
+      <TableCell>channels</TableCell>
+      <TableCell align="right">{ `${fileInfo.channels || '-'}` }</TableCell>
+    </TableRow>
+    </TableBody>
   </Table>
   </TableContainer>
 };

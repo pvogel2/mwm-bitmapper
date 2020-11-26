@@ -3,15 +3,19 @@ import { makeStyles } from '@material-ui/core/styles';
 const useStyles = makeStyles((theme) => ({
   image: {
     width: '100%',
+    position: 'absolute',
   },
   container: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'stretch',
     backgroundColor: '#ddd',
+    position: 'relative',
+    width: '100%',
+    paddingBottom: '100%',
   },
   placeholder: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    marginTop: '48%',
     textAlign: 'center'
   },
 }));
