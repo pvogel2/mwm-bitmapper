@@ -16,13 +16,6 @@ import MapPreview from './MapPreview';
 import FileInfo from './FileInfo';
 
 const useStyles = makeStyles((theme) => ({
-  card: {
-    minWidth: 275,
-    position: 'absolute',
-    top: '30px',
-    left: '30px',
-    zIndex: 1,
-  },
   avatar: {
     backgroundColor: theme.palette.secondary.main,
   },
@@ -52,7 +45,7 @@ function MainCard(props) {
   const filepath = sourcefile ? `${sourePath}/${sourcefile}` : '';
 
   return (
-    <Card className={classes.card}>
+    <Card>
       <CardHeader
         avatar={
           <Avatar 

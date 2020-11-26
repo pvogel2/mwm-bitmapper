@@ -10,13 +10,6 @@ import FileInfo from './FileInfo';
 import MapPreview from './MapPreview';
 
 const useStyles = makeStyles((theme) => ({
-  card: {
-    minWidth: 275,
-    position: 'absolute',
-    top: '30px',
-    right: '30px',
-    zIndex: 1,
-  },
   avatar: {
     backgroundColor: theme.palette.secondary.main,
   },
@@ -67,7 +60,7 @@ function HeightmapCard(props) {
   }, [sourcefile, heightmap]);
 
   return (
-    <Card className={classes.card}>
+    <Card>
       <CardHeader
         avatar={
           <Avatar 

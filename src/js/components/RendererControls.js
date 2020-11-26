@@ -15,8 +15,8 @@ const useStyles = makeStyles((theme) => ({
   card: {
     minWidth: 275,
     position: 'absolute',
-    top: '30px',
-    left: '30px',
+    top: '0',
+    left: '0',
     zIndex: 1,
   },
   avatar: {

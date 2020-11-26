@@ -5,17 +5,12 @@ import Renderer from './Renderer';
 import { connect } from 'react-redux';
 
 const useStyles = makeStyles((theme) => ({
-  card: {
-    minWidth: 275,
-    position: 'absolute',
-    top: '30px',
-    left: '500px',
-  },
   avatar: {
     backgroundColor: theme.palette.secondary.main,
   },
   root: {
     display: 'flex',
+    position: 'relative',
   },
   render: {
     width: '1024px',
@@ -36,7 +31,7 @@ function RenderCard(props) {
   };
 
   return (
-    <Card className={classes.card}>
+    <Card>
       <CardContent className={classes.root}>
         <Renderer  className={classes.render} />
       </CardContent>
