@@ -10,6 +10,20 @@ const optionDefinitions = [
     type: String,
     group: 'main',
   },
+  { 
+    name: 'convert',
+    alias: 'c',
+    description: 'Convert the input file to heightmap (default).',
+    type: Boolean,
+    group: 'main',
+  },
+  {
+    name: 'examine',
+    alias: 'e',
+    type: Boolean,
+    description: 'Examine the input file.',
+    group: 'main',
+  },
   {
     name: 'out',
     alias: 'o',
@@ -76,4 +90,6 @@ if (_none.verbose) {
 module.exports = {
   getSource: () => main.in,
   getTarget: () => main.out,
+  doConversion: () => main.convert,
+  doExamine: () => main.examine,
 };

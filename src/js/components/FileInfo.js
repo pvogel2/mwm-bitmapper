@@ -2,7 +2,6 @@ import { Table, TableBody, TableRow, TableCell, TableContainer } from '@material
 
 function FileInfo(props) {
   const { fileInfo = {} } = props;
-  console.log('>>>', fileInfo);
 
   return <TableContainer>
     <Table aria-label="file info table">

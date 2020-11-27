@@ -124,6 +124,52 @@ function calcHeightmap(sourceFile, targetFile) {
   });
 }
 
+function validateSource(sourceFile) {
+  const extName = path.extname(sourceFile);
+
+  if (extName === '.png') {
+    console.log('validate PNG', sourceFile);
+    const p = new Promise((resolve, reject) => {
+      try {
+        fs.createReadStream(sourceFile)
+        .pipe(
+          new PNG({
+            skipRescale: true,
+          })
+        ).on('metadata', (metadata) => {
+          console.log(`metadata ${JSON.stringify(metadata)}`);
+          resolve(metadata);
+        });
+      } catch(err) {
+        console.log(err.message);
+        reject(err);
+      }
+    });
+    return p;
+  }
+
+
+  console.log('convert RAW');
+  return new Promise((resolve, reject) => {
+    fs.readFile(`${sourceFile}`, (err, rawBuffer) => {
+      if (err) {
+        reject(err);
+      };
+
+      const resolution = Math.sqrt(rawBuffer.length);
+  
+      const info = {
+        width: resolution,
+        height: resolution,
+        file: sourceFile,
+      };
+      console.log(info);
+      resolve(info);
+    });
+  });
+}
+
 module.exports = (() => ({
   calcHeightmap,
+  validateSource,
 }))();

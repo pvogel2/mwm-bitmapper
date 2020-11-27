@@ -11,7 +11,14 @@ if (!sourceFile) {
 }
 
 const extName = path.extname(sourceFile);
-const targetName = path.basename(targetFile) || `bmout_${path.basename(sourceFile, extName)}.png`;
-const targetPath = path.dirname(targetFile) || '';
+const targetName = targetFile ? path.basename(targetFile) : `bmout_${path.basename(sourceFile, extName)}.png`;
+const targetPath = targetFile ? path.dirname(targetFile) : '';
 
-converter.calcHeightmap(sourceFile, path.join(targetPath, targetName));
+if (cmdline.doExamine()) {
+  console.log(sourceFile);
+  converter.validateSource(sourceFile);
+}
+
+if (cmdline.doConversion()) {
+  converter.calcHeightmap(sourceFile, path.join(targetPath, targetName));
+}

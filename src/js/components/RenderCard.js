@@ -38,7 +38,7 @@ function RenderCard(props) {
     <Card>
       <CardContent className={classes.root}>
         <div className={classes.renderContainer}>
-         <Renderer  className={classes.render} />
+         <Renderer className={classes.render} />
         </div>
       </CardContent>
     </Card>

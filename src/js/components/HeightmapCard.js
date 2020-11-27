@@ -30,7 +30,7 @@ function HeightmapCard(props) {
 
   const classes = useStyles();
 
-  const [fileInfo, setFileInfo] = useState(null);
+  const [fileInfo, setFileInfo] = useState();
 
   useEffect(async () => {
     if (sourcefile && !heightmap) {      
@@ -59,6 +59,8 @@ function HeightmapCard(props) {
     }
   }, [sourcefile, heightmap]);
 
+  const heightmapFile = heightmap ? `/converted/${heightmap}` : null;
+
   return (
     <Card>
       <CardHeader
@@ -73,8 +75,8 @@ function HeightmapCard(props) {
         subheader={ heightmap }
       />
       <CardContent className={classes.root}>
-        { heightmap && <MapPreview src={`/converted/${heightmap}`} /> }
-        { fileInfo && <FileInfo fileInfo={fileInfo} /> }
+        <MapPreview src={heightmapFile} />
+        <FileInfo fileInfo={fileInfo} />
       </CardContent>
     </Card>
   );

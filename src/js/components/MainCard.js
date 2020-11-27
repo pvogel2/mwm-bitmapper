@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
 function MainCard(props) {
   const { sourcefile, setSourcefile, setHeightmap } = props;
 
-  const [fileInfo, setFileInfo] = useState(null);
+  const [fileInfo, setFileInfo] = useState();
 
   const sourePath = '/uploaded';
 
@@ -68,7 +68,7 @@ function MainCard(props) {
       />
       <CardContent className={classes.root}>
           <MapPreview src={filepath} />
-          { fileInfo && <FileInfo fileInfo={fileInfo} /> }
+          <FileInfo fileInfo={fileInfo} />
       </CardContent>
       <CardActions>
         <Upload onUpload={ onUpload } />
