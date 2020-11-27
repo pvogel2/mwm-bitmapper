@@ -1,6 +1,7 @@
 const path = require('path');
 const express = require('express');
 const multer  = require('multer');
+const converter = require('../api/converter');
 
 const uploadDir = path.join(__dirname, '../../data/uploads');
 
@@ -18,9 +19,11 @@ const router = express.Router();
 
 router.use('/uploaded', express.static(uploadDir));
 
-router.post('/upload', upload.single('file'), (req, res) => {
-  console.log('Upload data:', req.file, req.body);
-  res.json(req.file);
+router.post('/upload', upload.single('file'), async (req, res) => {
+  const data = await converter.validateSource(path.join(uploadDir, req.file.originalname));
+  const result = Object.assign(data, req.file);
+  console.log(result);
+  res.json(result);
 });
 
 module.exports = router;

@@ -155,14 +155,25 @@ function validateSource(sourceFile) {
       if (err) {
         reject(err);
       };
-
-      const resolution = Math.sqrt(rawBuffer.length);
-  
       const info = {
-        width: resolution,
-        height: resolution,
         file: sourceFile,
       };
+
+      let bitDepth = 2;
+      const rawLength = rawBuffer.length;
+
+      let resolution = Math.sqrt(rawLength / bitDepth++);
+      if (rawLength % resolution === 0) {
+        info.width = resolution;
+        info.height = resolution;
+        info.depth = bitDepth * 8;
+      } else if (rawLength % Math.sqrt(rawLength / bitDepth++) === 0) {
+        resolution = Math.sqrt(rawLength / bitDepth);
+        info.width = resolution;
+        info.height = resolution;
+        info.depth = bitDepth * 8;
+      }
+
       console.log(info);
       resolve(info);
     });
