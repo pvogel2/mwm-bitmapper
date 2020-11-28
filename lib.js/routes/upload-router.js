@@ -22,7 +22,6 @@ router.use('/uploaded', express.static(uploadDir));
 router.post('/upload', upload.single('file'), async (req, res) => {
   const data = await converter.validateSource(path.join(uploadDir, req.file.originalname));
   const result = Object.assign(data, req.file);
-  console.log(result);
   res.json(result);
 });
 

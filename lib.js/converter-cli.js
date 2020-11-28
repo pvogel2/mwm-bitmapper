@@ -15,7 +15,6 @@ const targetName = targetFile ? path.basename(targetFile) : `bmout_${path.basena
 const targetPath = targetFile ? path.dirname(targetFile) : '';
 
 if (cmdline.doExamine()) {
-  console.log(sourceFile);
   converter.validateSource(sourceFile);
 }
 

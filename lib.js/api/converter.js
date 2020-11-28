@@ -54,13 +54,15 @@ function calcHeightmap(sourceFile, targetFile) {
 
   if (extName === '.png') {
     console.log('convert PNG', sourceFile);
-    let _meta = {};
+    const depth = 16;
+    const colorType = 2;
+
     const p = new Promise((resolve, reject) => {
       fs.createReadStream(sourceFile)
       .pipe(
         new PNG({
-          colorType: 2,
-          depth: 16,
+          colorType,
+          depth,
           skipRescale: true,
         })
       ).on('metadata', function(metadata) {
@@ -80,14 +82,14 @@ function calcHeightmap(sourceFile, targetFile) {
           }
         }
         const resolution = this.width;
-        console.log(`write to ${targetFile}, (${resolution}), ${idx}, ${rawBuffer.length}`);
+        console.log(`write to ${targetFile}`);
         writeBuffer_RGB({
           width: resolution,
           height: resolution,
           buffer: rawBuffer,
           file: targetFile,
         }).then((result) => {
-          resolve(Object.assign(result, { filename: targetName }));
+          resolve(Object.assign(result, { filename: targetName, depth, colorType }));
         })
         .catch((err) => {
           reject(err);
@@ -105,8 +107,8 @@ function calcHeightmap(sourceFile, targetFile) {
         return new Promise.reject(err);
       };
 
-      const bytedepth = 2;
-      const resolution = Math.sqrt(rawBuffer.length / bytedepth);
+      const depth = 2;
+      const resolution = Math.sqrt(rawBuffer.length / depth);
   
       console.log(`write to ${targetFile}, (${resolution})`);
       writePNG_RGB({
@@ -124,6 +126,17 @@ function calcHeightmap(sourceFile, targetFile) {
   });
 }
 
+function getChannels(type) {
+  switch(type) {
+    case 0: return 1; // greyscale
+    case 2: return 3; // rgb
+    case 3: return 0; // indexed
+    case 4: return 2; // greyscale, alpha
+    case 6: return 4; // rgb, alpha
+    default: return '';
+  }
+}
+
 function validateSource(sourceFile) {
   const extName = path.extname(sourceFile);
 
@@ -137,8 +150,9 @@ function validateSource(sourceFile) {
             skipRescale: true,
           })
         ).on('metadata', (metadata) => {
+
           console.log(`metadata ${JSON.stringify(metadata)}`);
-          resolve(metadata);
+          resolve(Object.assign(metadata, { channels: getChannels(metaData.colorType)}));
         });
       } catch(err) {
         console.log(err.message);
@@ -157,17 +171,18 @@ function validateSource(sourceFile) {
       };
       const info = {
         file: sourceFile,
+        channels: 1,
       };
 
       let bitDepth = 2;
       const rawLength = rawBuffer.length;
 
-      let resolution = Math.sqrt(rawLength / bitDepth++);
+      let resolution = Math.sqrt(rawLength / bitDepth);
       if (rawLength % resolution === 0) {
         info.width = resolution;
         info.height = resolution;
         info.depth = bitDepth * 8;
-      } else if (rawLength % Math.sqrt(rawLength / bitDepth++) === 0) {
+      } else if (rawLength % Math.sqrt(rawLength / ++bitDepth) === 0) {
         resolution = Math.sqrt(rawLength / bitDepth);
         info.width = resolution;
         info.height = resolution;

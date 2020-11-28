@@ -26,6 +26,14 @@ function FileInfo(props) {
       <TableCell>channels</TableCell>
       <TableCell align="right">{ `${fileInfo.channels || '-'}` }</TableCell>
     </TableRow>
+    <TableRow>
+      <TableCell>bitdepth</TableCell>
+      <TableCell align="right">{ `${fileInfo.depth || '-'} b` }</TableCell>
+    </TableRow>
+    <TableRow>
+      <TableCell>colortype</TableCell>
+      <TableCell align="right">{ `${!isNaN(fileInfo.colorType) ? fileInfo.colorType : '-'}` }</TableCell>
+    </TableRow>
     </TableBody>
   </Table>
   </TableContainer>
