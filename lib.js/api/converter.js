@@ -8,6 +8,9 @@ function writePNG_RGB(data) {
   const pngBuffer = Buffer.alloc(3 * data.width * data.height);
   let rawScale = 2;
   let pngScale = 3;
+  const depth = 8;
+  const colorType = 2;
+
   for (let i = 0; i < data.width * data.height; i++) {
     pngBuffer[i * pngScale] = data.buffer[i * rawScale];
     pngBuffer[i * pngScale + 1] = data.buffer[i * rawScale + 1];
@@ -22,15 +25,21 @@ function writePNG_RGB(data) {
   };
 
   /**
-   * returns a thenable function, handle result and error on your oun
+   * returns a thenable function, handle result and error on your own
    */
   return SHARP(pngBuffer, outImg)
     .png()
     .resize(data.width, data.height)
-    .toFile(data.file);
+    .toFile(data.file)
+    .then(info => {
+      return Object.assign(info, {depth, colorType});
+    });
 }
 
 function writeBuffer_RGB(data) {
+  const depth = 8;
+  const colorType = 2;
+
   const outImg = {
     raw: {
       width: data.width,
@@ -45,7 +54,10 @@ function writeBuffer_RGB(data) {
   return SHARP(data.buffer, outImg)
     .png()
     .resize(data.width, data.height)
-    .toFile(data.file);
+    .toFile(data.file)
+    .then(info => {
+      return Object.assign(info, {depth, colorType});
+    });
 }
 
 function calcHeightmap(sourceFile, targetFile) {
@@ -54,7 +66,7 @@ function calcHeightmap(sourceFile, targetFile) {
 
   if (extName === '.png') {
     console.log('convert PNG', sourceFile);
-    const depth = 16;
+    const depth = 8;
     const colorType = 2;
 
     const p = new Promise((resolve, reject) => {
@@ -89,7 +101,7 @@ function calcHeightmap(sourceFile, targetFile) {
           buffer: rawBuffer,
           file: targetFile,
         }).then((result) => {
-          resolve(Object.assign(result, { filename: targetName, depth, colorType }));
+          resolve(Object.assign(result, { filename: targetName}));
         })
         .catch((err) => {
           reject(err);
@@ -152,7 +164,7 @@ function validateSource(sourceFile) {
         ).on('metadata', (metadata) => {
 
           console.log(`metadata ${JSON.stringify(metadata)}`);
-          resolve(Object.assign(metadata, { channels: getChannels(metaData.colorType)}));
+          resolve(Object.assign(metadata, { channels: getChannels(metadata.colorType)}));
         });
       } catch(err) {
         console.log(err.message);
@@ -171,7 +183,7 @@ function validateSource(sourceFile) {
       };
       const info = {
         file: sourceFile,
-        channels: 1,
+        channels: 1, // all is interpreted as greyscale
       };
 
       let bitDepth = 2;
@@ -189,7 +201,6 @@ function validateSource(sourceFile) {
         info.depth = bitDepth * 8;
       }
 
-      console.log(info);
       resolve(info);
     });
   });
