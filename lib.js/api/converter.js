@@ -337,7 +337,7 @@ async function calcTiles(sourceFile, tileSize, targetBase) {
       const rawHeight = _meta.height;
 
       const reqWidth = getRequiredWidth(_meta.width);
-      console.log(_meta.width, reqWidth);
+      const tileCount = Math.floor(reqWidth / tileSize);
       let rawIdx = 0;
       const rawBuffer = Buffer.alloc(3 * reqWidth * reqWidth);
 
@@ -353,7 +353,7 @@ async function calcTiles(sourceFile, tileSize, targetBase) {
         }
       }
 
-      writeBuffer_RGB({
+      /* writeBuffer_RGB({
         width: reqWidth,
         height: reqWidth,
         buffer: rawBuffer,
@@ -362,7 +362,41 @@ async function calcTiles(sourceFile, tileSize, targetBase) {
         resolve({ filename: `xx_${targetBase}` });
       }).catch((err) => {
         reject(err);
-      });
+      }); */
+      const outImg = {
+        raw: {
+          width: reqWidth,
+          height: reqWidth,
+          channels: 3,
+        },
+      };
+    
+      const dWidth = reqWidth - _meta.width;
+      const startldWidth = Math.floor(dWidth / 2);
+      const endldWidth = dWidth - startldWidth;
+
+      const result = SHARP(rawBuffer, outImg)
+        .png()
+        .resize(_meta.width, _meta.width)
+        .extend({
+          top: startldWidth,
+          left: startldWidth,
+          bottom: endldWidth,
+          right: endldWidth,
+        });
+      
+      for (let bh = 0; bh < tileCount; bh++) {
+        for (let bw = 0; bw < tileCount; bw++) {
+          result.extract({
+            left: bw * tileSize,
+            top: bh * tileSize,
+            width: tileSize,
+            height: tileSize,
+          }).toFile(`${bw}${bh}_${targetBase}`, function(err) {
+            console.log(err);
+          });
+        }
+      }
     });
   });
 
