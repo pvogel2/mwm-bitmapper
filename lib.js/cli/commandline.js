@@ -25,6 +25,13 @@ const optionDefinitions = [
     group: 'main',
   },
   {
+    name: 'tile',
+    alias: 't',
+    type: Number,
+    description: 'Set the size of tile and generate tiles matrix from input file.',
+    group: 'main',
+  },
+  {
     name: 'out',
     alias: 'o',
     type: String,
@@ -90,6 +97,8 @@ if (_none.verbose) {
 module.exports = {
   getSource: () => main.in,
   getTarget: () => main.out,
+  getTileSize: () => main.tile,
   doConversion: () => main.convert,
   doExamine: () => main.examine,
+  doTiles: () => main.tile
 };

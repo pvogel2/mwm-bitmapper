@@ -206,7 +206,171 @@ function validateSource(sourceFile) {
   });
 }
 
+function getRequiredWidth(w) {
+  // check for w if not 0 and w power of 2
+  if (w && !(w & (w - 1))) {
+    return w;
+  }
+  w--;
+  w |= w >> 1;
+  w |= w >> 2;
+  w |= w >> 4;
+  w |= w >> 8;
+  w |= w >> 16;
+  w++;
+  return w;
+}
+/**
+ * For now we expect a greyscale png file as source
+ * @param {string} sourceFile 
+ * @param {number} tileSize 
+ * @param {string} targetBase 
+ */
+async function __calcTiles(sourceFile, tileSize, targetBase) {
+  const depth = 8;
+  const colorType = 2;
+  const metadata = await validateSource(sourceFile);
+
+  let width = Number(metadata.width);
+  const requiredWidth = getRequiredWidth(width);
+
+  const tileCount = Math.floor(requiredWidth / tileSize);
+
+  if (!tileCount) {
+    console.log(`Width of sourcefile not sufficient (${tileCount})`);
+    return null;
+  }
+
+  const p = new Promise((resolve, reject) => {
+    fs.createReadStream(sourceFile).pipe(
+      new PNG({
+        colorType,
+        depth,
+        skipRescale: true,
+      })
+    ).on('metadata', function(metadata) {
+      _meta = metadata;
+    }).on('parsed', function(data) {
+      const buffers = [];
+      const rawIndices = [];
+      for (let bh = 0;bh < tileCount;bh++) {
+        for (let bw = 0;bw < tileCount;bw++) {
+          if (!buffers[bh]) {
+            buffers[bh] = [];
+          }
+          if (!rawIndices[bh]) {
+            rawIndices[bh] = [];
+          }
+          buffers[bh][bw] = Buffer.alloc(3 * tileSize * tileSize);
+          rawIndices[bh][bw] = 0;
+        }
+      }
+
+      const rawWidth = _meta.width;
+      const rawHeight = _meta.height;
+
+      for (var y = 0; y < rawHeight; y++) {
+        for (var x = 0; x < rawWidth; x++) {
+          var idx = (rawWidth * y + x) << 2;
+          const raw = data[idx];
+          xIdx = Math.floor(x / tileSize);
+          yIdx = Math.floor(y / tileSize);
+
+          if (buffers[yIdx] && buffers[xIdx]) {
+            const rawBuffer = buffers[yIdx][xIdx];
+            const rawIdx = rawIndices[yIdx][xIdx];
+
+            rawBuffer[rawIdx] = Number(raw) & 0xff;
+            rawBuffer[rawIdx + 1] = raw>>8;
+            rawBuffer[rawIdx + 2] = 0;
+            rawIndices[yIdx][xIdx] += 3;
+          }
+        }
+      }
+
+      const allPromises = [];
+      let index = 1;
+      for (let bh = 0;bh < tileCount; bh++) {
+        for (let bw = 0;bw < tileCount; bw++) {
+
+          const targetFile = `${index < 10 ? '0' : ''}${index++}_${targetBase}`;
+
+          console.log(`write to ${targetFile}`);
+
+          allPromises.push(writeBuffer_RGB({
+            width: tileSize,
+            height: tileSize,
+            buffer: buffers[bh][bw],
+            file: targetFile,
+          }));
+        }
+      }
+
+      Promise.all(allPromises)
+      .then(() => {
+        resolve({ filename: `xx_${targetBase}` });
+      }).catch((err) => {
+        reject(err);
+      });
+    });
+  });
+
+  return p;
+};
+
+async function calcTiles(sourceFile, tileSize, targetBase) {
+  const depth = 8;
+  const colorType = 2;
+  let _meta = {};
+
+  const p = new Promise((resolve, reject) => {
+    fs.createReadStream(sourceFile).pipe(
+      new PNG({
+        colorType,
+        depth,
+        skipRescale: true,
+      })
+    ).on('metadata', function(metadata) {
+      _meta = metadata;
+    }).on('parsed', function(data) {
+       const rawWidth = _meta.width;
+      const rawHeight = _meta.height;
+
+      const reqWidth = getRequiredWidth(_meta.width);
+      console.log(_meta.width, reqWidth);
+      let rawIdx = 0;
+      const rawBuffer = Buffer.alloc(3 * reqWidth * reqWidth);
+
+      for (let y = 0; y < reqWidth; y++) {
+        for (let x = 0; x < reqWidth; x++) {
+          const idx = (rawWidth * y + x) << 2;
+          const raw = ((y < rawHeight && x <  rawWidth) ? data[idx] : 0);
+
+          rawBuffer[rawIdx] = Number(raw) & 0xff;
+          rawBuffer[rawIdx + 1] = raw>>8;
+          rawBuffer[rawIdx + 2] = 0;
+          rawIdx += 3;
+        }
+      }
+
+      writeBuffer_RGB({
+        width: reqWidth,
+        height: reqWidth,
+        buffer: rawBuffer,
+        file: targetBase,
+      }).then(() => {
+        resolve({ filename: `xx_${targetBase}` });
+      }).catch((err) => {
+        reject(err);
+      });
+    });
+  });
+
+  return p;
+};
+
 module.exports = (() => ({
   calcHeightmap,
   validateSource,
+  calcTiles,
 }))();
