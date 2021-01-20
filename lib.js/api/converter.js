@@ -323,7 +323,6 @@ async function calcTiles(sourceFile, tileSize, targetBase) {
   const colorType = 2;
   let _meta = {};
 
-  const p = new Promise((resolve, reject) => {
     fs.createReadStream(sourceFile).pipe(
       new PNG({
         colorType,
@@ -332,19 +331,17 @@ async function calcTiles(sourceFile, tileSize, targetBase) {
       })
     ).on('metadata', function(metadata) {
       _meta = metadata;
-    }).on('parsed', function(data) {
-       const rawWidth = _meta.width;
-      const rawHeight = _meta.height;
-
+    }).on('parsed', async function(data) {
+      const rawWidth = _meta.width;
       const reqWidth = getRequiredWidth(_meta.width);
       const tileCount = Math.floor(reqWidth / tileSize);
       let rawIdx = 0;
-      const rawBuffer = Buffer.alloc(3 * reqWidth * reqWidth);
+      const rawBuffer = Buffer.alloc(3 * rawWidth * rawWidth);
 
-      for (let y = 0; y < reqWidth; y++) {
-        for (let x = 0; x < reqWidth; x++) {
+      for (let y = 0; y < rawWidth; y++) {
+        for (let x = 0; x < rawWidth; x++) {
           const idx = (rawWidth * y + x) << 2;
-          const raw = ((y < rawHeight && x <  rawWidth) ? data[idx] : 0);
+          const raw = data[idx];
 
           rawBuffer[rawIdx] = Number(raw) & 0xff;
           rawBuffer[rawIdx + 1] = raw>>8;
@@ -353,16 +350,26 @@ async function calcTiles(sourceFile, tileSize, targetBase) {
         }
       }
 
-      /* writeBuffer_RGB({
-        width: reqWidth,
-        height: reqWidth,
-        buffer: rawBuffer,
-        file: targetBase,
-      }).then(() => {
-        resolve({ filename: `xx_${targetBase}` });
-      }).catch((err) => {
-        reject(err);
-      }); */
+      const inImg = {
+        raw: {
+          width: rawWidth,
+          height: rawWidth,
+          channels: 3,
+        },
+      };
+
+      const dWidth = reqWidth - _meta.width;
+      const startldWidth = Math.floor(dWidth / 2);
+      const endldWidth = dWidth - startldWidth;
+
+      const dataBuffer = await SHARP(rawBuffer, inImg)
+        .extend({
+          top: startldWidth,
+          left: startldWidth,
+          bottom: endldWidth,
+          right: endldWidth,
+        }).toBuffer();
+
       const outImg = {
         raw: {
           width: reqWidth,
@@ -370,37 +377,26 @@ async function calcTiles(sourceFile, tileSize, targetBase) {
           channels: 3,
         },
       };
-    
-      const dWidth = reqWidth - _meta.width;
-      const startldWidth = Math.floor(dWidth / 2);
-      const endldWidth = dWidth - startldWidth;
+      const result = SHARP(dataBuffer, outImg).png();
 
-      const result = SHARP(rawBuffer, outImg)
-        .png()
-        .resize(_meta.width, _meta.width)
-        .extend({
-          top: startldWidth,
-          left: startldWidth,
-          bottom: endldWidth,
-          right: endldWidth,
-        });
-      
+      let counter = 0;
       for (let bh = 0; bh < tileCount; bh++) {
         for (let bw = 0; bw < tileCount; bw++) {
+          counter++;
           result.extract({
             left: bw * tileSize,
             top: bh * tileSize,
             width: tileSize,
             height: tileSize,
-          }).toFile(`${bw}${bh}_${targetBase}`, function(err) {
+          // }).toFile(`${bw}${bh}_${targetBase}`, function(err) {
+          }).toFile(`terrain_${counter < 10 ? '0' : ''}${counter}.png`, function(err) {
             console.log(err);
           });
         }
       }
     });
-  });
 
-  return p;
+  return {result: 'ok'};
 };
 
 module.exports = (() => ({
