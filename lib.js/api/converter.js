@@ -364,36 +364,58 @@ async function calcTiles(sourceFile, tileSize, targetBase) {
 
       const dataBuffer = await SHARP(rawBuffer, inImg)
         .extend({
-          top: startldWidth,
-          left: startldWidth,
-          bottom: endldWidth,
-          right: endldWidth,
+          top: startldWidth + 2,
+          left: startldWidth + 2,
+          bottom: endldWidth + 2,
+          right: endldWidth + 2,
         }).toBuffer();
 
-      const outImg = {
+        const origWidth = reqWidth;
+        const origHeight = reqWidth;
+        console.log('>>>', reqWidth + 4);
+        const outImg = {
         raw: {
-          width: reqWidth,
-          height: reqWidth,
+          width: reqWidth + 4,
+          height: reqWidth + 4,
           channels: 3,
         },
       };
       const result = SHARP(dataBuffer, outImg).png();
 
       let counter = 0;
+      const files = [];
       for (let bh = 0; bh < tileCount; bh++) {
         for (let bw = 0; bw < tileCount; bw++) {
           counter++;
+          const filename = `terrain_${counter < 10 ? '0' : ''}${counter}.png`;
+          files.push({ input: filename, top: bh * (tileSize + 4), left: bw * (tileSize + 4) });
+
           result.extract({
             left: bw * tileSize,
             top: bh * tileSize,
-            width: tileSize,
-            height: tileSize,
-          // }).toFile(`${bw}${bh}_${targetBase}`, function(err) {
-          }).toFile(`terrain_${counter < 10 ? '0' : ''}${counter}.png`, function(err) {
+            width: tileSize + 4,
+            height: tileSize + 4,
+          })
+          .toFile(filename, function(err) {
             console.log(err);
           });
         }
       }
+
+      /* final target image */
+      SHARP({
+        create: {
+          width: tileCount * (tileSize + 4),
+          height: tileCount * (tileSize + 4),
+          channels: 3,
+          background: { r: 0, g: 0, b: 0}
+        }
+      })
+      .png()
+      .composite(files)
+      .toFile('terrain_final.png', function(err) {
+        console.log(err);
+      });
     });
 
   return {result: 'ok'};
