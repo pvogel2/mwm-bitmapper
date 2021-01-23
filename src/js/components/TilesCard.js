@@ -7,16 +7,20 @@ import Button from '@material-ui/core/Button';
 import UICard from './UICard';
 
 function TilesCard(props) {
-  const { tilesmap } = props;
-  const tilesmapFile = tilesmap ? `/tiles/${tilesmap}` : null;
+  const { tilesmap, sourcefile, setTilesmap } = props;
+  const tilesmapFile = tilesmap ? `/converted/${tilesmap}` : null;
 
   const [fileInfo, setFileInfo] = useState();
 
   function onClick(event) {
-    fetch('/tiles').then(
+    if (!sourcefile) {
+      return;
+    };
+    fetch(`/tiles?filename=${sourcefile}&tilesize=256`).then(
       response => response.json() // if the response is a JSON object
     ).then(json => {
-      console.log(json);
+      setFileInfo(json);
+      setTilesmap(json.filename);
     }).catch(
       error => console.log(error) // Handle the error response object
     );
@@ -37,6 +41,7 @@ function TilesCard(props) {
         <Button
           variant="contained"
           component="label"
+          disabled= { !sourcefile }
           onClick={ onClick }
         >
         Create Tiles

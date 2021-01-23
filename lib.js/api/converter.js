@@ -221,11 +221,13 @@ function getRequiredWidth(w) {
   return w;
 }
 
-async function calcTiles(sourceFile, targetFile, tileSize) {
+function calcTiles(sourceFile, targetFile, tileSize) {
   const depth = 16;
   const colorType = 2;
   let _meta = {};
+  const targetName = path.basename(targetFile);
 
+  const p = new Promise((resolve, reject) => {
     fs.createReadStream(sourceFile).pipe(
       new PNG({
         colorType,
@@ -233,7 +235,6 @@ async function calcTiles(sourceFile, targetFile, tileSize) {
         skipRescale: true,
       })
     ).on('metadata', function(metadata) {
-      console.log('metadata:', metadata);
       _meta = metadata;
     }).on('parsed', async function(data) {
       const rawWidth = _meta.width;
@@ -274,9 +275,6 @@ async function calcTiles(sourceFile, targetFile, tileSize) {
           right: endldWidth + 2,
         }).toBuffer();
 
-        const origWidth = reqWidth;
-        const origHeight = reqWidth;
-        console.log('>>>', reqWidth + 4);
         const outImg = {
         raw: {
           width: reqWidth + 4,
@@ -317,12 +315,17 @@ async function calcTiles(sourceFile, targetFile, tileSize) {
       })
       .png()
       .composite(files)
-      .toFile(targetFile, function(err) {
-        console.log(err);
+      .toFile(targetFile)
+      .then(info => {
+        Object.assign(info, { filename: path.basename(targetName), depth: 8 })
+        resolve(info);
+      })
+      .catch((err) => {
+        reject(err);
       });
     });
-
-  return {result: 'ok'};
+  });
+  return p;
 };
 
 module.exports = (() => ({

@@ -24,5 +24,5 @@ if (cmdline.doConversion()) {
 
 if (cmdline.doTiles()) {
   const tileSize = cmdline.getTileSize(); // required
-  converter.calcTiles(sourceFile, tileSize, path.join(targetPath, targetName));
+  converter.calcTiles(sourceFile, path.join(targetPath, targetName), tileSize);
 }

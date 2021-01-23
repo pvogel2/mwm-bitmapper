@@ -1,7 +1,7 @@
 
 import { connect } from 'react-redux';
 import Button from '@material-ui/core/Button';
-import { setSourcefile, setHeightmap } from '../store/actions.js';
+import { setSourcefile, setHeightmap, setTilesmap } from '../store/actions.js';
 
 function Upload(props) {
   const { setHeightmap, setSourcefile, onUpload = () => {} } = props;
@@ -20,6 +20,7 @@ function Upload(props) {
       fileinfo => {
         setSourcefile(fileinfo.filename);
         setHeightmap('');
+        setTilesmap('');
         onUpload(fileinfo);
         return fileinfo;
       }
