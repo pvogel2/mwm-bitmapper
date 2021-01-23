@@ -1,33 +1,12 @@
-import { 
-  Card,
-  CardHeader,
-  CardContent,
-  CardActions,
-  Avatar,
-  IconButton,
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import UndoIcon from '@material-ui/icons/Undo';
+import { Button } from '@material-ui/core';
 import { connect } from 'react-redux';
-import { useState, useEffect } from 'react';
-
+import { useState } from 'react';
 import { setSourcefile, setHeightmap } from '../store/actions.js';
-
 import Upload from './Upload';
 import MapPreview from './MapPreview';
 import FileInfo from './FileInfo';
+import UICard from './UICard';
 
-const useStyles = makeStyles((theme) => ({
-  avatar: {
-    backgroundColor: theme.palette.secondary.main,
-  },
-  root: {
-  },
-  formControl: {
-    margin: theme.spacing(3),
-  },
-}));
-  
 function MainCard(props) {
   const { sourcefile, setSourcefile, setHeightmap } = props;
 
@@ -44,37 +23,28 @@ function MainCard(props) {
     setFileInfo(result);
   };
 
-  const classes = useStyles();
-
   const filepath = sourcefile ? `${sourePath}/${sourcefile}` : '';
 
   return (
-    <Card>
-      <CardHeader
-        avatar={
-          <Avatar 
-            aria-label="main"
-            className={classes.avatar}>
-            M
-          </Avatar>
-        }
-        action={
-          <IconButton title="Reset" aria-label="Reset" onClick={onResetClick}>
-            <UndoIcon />
-          </IconButton>
-        }
-        title="Main"
-        subheader="Upload and process heightmap."
-      />
-      <CardContent className={classes.root}>
+    <UICard
+      avatar='M'
+      title='Main'
+      subtitle='Upload and process heightmap'
+      details={
+        <>
           <MapPreview src={filepath} />
           <FileInfo fileInfo={fileInfo} />
-      </CardContent>
-      <CardActions>
-        <Upload onUpload={ onUpload } />
-      </CardActions>
-    </Card>
-  );
+        </>
+      }
+      actions={
+        <>
+          <Upload onUpload={ onUpload } />
+          <Button title="Reset" aria-label="Reset" onClick={onResetClick}>Reset</Button>
+        </>
+      }
+    >
+    </UICard>
+   );
 };
 
 function mapStateToProps(state) {

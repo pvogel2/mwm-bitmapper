@@ -1,34 +1,12 @@
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import { makeStyles } from '@material-ui/core/styles';
-import CardHeader from '@material-ui/core/CardHeader';
-import Avatar from '@material-ui/core/Avatar';
 import { setHeightmap } from '../store/actions.js';
 import { connect } from 'react-redux';
 import { useState, useEffect } from 'react';
 import FileInfo from './FileInfo';
 import MapPreview from './MapPreview';
+import UICard from './UICard';
 
-const useStyles = makeStyles((theme) => ({
-  avatar: {
-    backgroundColor: theme.palette.secondary.main,
-  },
-  hightmapImage: {
-    backgroundColor: '#ccc',
-  },
-  root: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  formControl: {
-    margin: theme.spacing(3),
-  },
-}));
-  
 function HeightmapCard(props) {
   const { heightmap, sourcefile, setHeightmap } = props;
-
-  const classes = useStyles();
 
   const [fileInfo, setFileInfo] = useState();
 
@@ -62,23 +40,18 @@ function HeightmapCard(props) {
   const heightmapFile = heightmap ? `/converted/${heightmap}` : null;
 
   return (
-    <Card>
-      <CardHeader
-        avatar={
-          <Avatar 
-            aria-label='height map'
-            className={classes.avatar}>
-            H
-          </Avatar>
-        }
-        title='Height map'
-        subheader={ heightmap }
-      />
-      <CardContent className={classes.root}>
-        <MapPreview src={heightmapFile} />
-        <FileInfo fileInfo={fileInfo} />
-      </CardContent>
-    </Card>
+    <UICard
+      avatar='H'
+      title='Height map'
+      subtitle={ heightmap }
+      details={
+        <>
+          <MapPreview src={heightmapFile} />
+          <FileInfo fileInfo={fileInfo} />
+        </>
+      }
+    >
+    </UICard>
   );
 };
 

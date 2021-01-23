@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import { HEIGHTMAP, SOURCEFILE } from './actions';
+import { HEIGHTMAP, SOURCEFILE, TILESMAP } from './actions';
 
 function heightmap(heightmap = '', action) {
   if (action.type === HEIGHTMAP) {
@@ -18,7 +18,17 @@ function sourcefile(sourcefile = '', action) {
   }
 }
 
+function tilesmap(tilesmap = '', action) {
+  console.log('tilesmap', action);
+  if (action.type === TILESMAP) {
+    return action.tilesmap;
+  } else {
+    return tilesmap;
+  }
+}
+
 export default combineReducers({
   heightmap,
   sourcefile,
+  tilesmap,
 });
