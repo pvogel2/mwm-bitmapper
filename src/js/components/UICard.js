@@ -1,3 +1,6 @@
+import { connect } from 'react-redux';
+import { setAccExpanded } from '../store/actions.js';
+
 import { 
   CardHeader,
   Avatar,
@@ -25,13 +28,20 @@ function UICard(props) {
     subtitle = 'sub',
     details,
     actions,
+    accExpanded,
+    setAccExpanded,
   } = props;
 
   const classes = useStyles();
   const hasActions = React.isValidElement(actions);
 
+  const name = `panel${avatar}`;
+  const handleChange = () => (event, isExpanded) => {
+    setAccExpanded(isExpanded ? name : '');
+  };
+
   return (
-    <Accordion>
+    <Accordion expanded={ accExpanded === name } onChange={ handleChange() } >
       <AccordionSummary>
       <CardHeader
         avatar={
@@ -61,4 +71,19 @@ function UICard(props) {
   );
 };
 
-export default UICard;
+function mapStateToProps(state) {
+  return {
+    accExpanded: state.accExpanded,
+  }
+};
+
+function mapDispatchToProps(dispatch) {
+  return {
+    setAccExpanded: accExpanded => dispatch(setAccExpanded(accExpanded)),
+  }
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(UICard);

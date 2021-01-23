@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { connect } from 'react-redux';
 import FileInfo from './FileInfo';
 import MapPreview from './MapPreview';
+import Button from '@material-ui/core/Button';
 import UICard from './UICard';
 
 function TilesCard(props) {
@@ -10,6 +11,16 @@ function TilesCard(props) {
   const tilesmapFile = tilesmap ? `/tiles/${tilesmap}` : null;
 
   const [fileInfo, setFileInfo] = useState();
+
+  function onClick(event) {
+    fetch('/tiles').then(
+      response => response.json() // if the response is a JSON object
+    ).then(json => {
+      console.log(json);
+    }).catch(
+      error => console.log(error) // Handle the error response object
+    );
+  };
 
   return (
     <UICard
@@ -21,6 +32,15 @@ function TilesCard(props) {
           <MapPreview src={tilesmapFile} />
           <FileInfo fileInfo={fileInfo} />
         </>
+      }
+      actions={
+        <Button
+          variant="contained"
+          component="label"
+          onClick={ onClick }
+        >
+        Create Tiles
+        </Button>
       }
     >
     </UICard>

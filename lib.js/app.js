@@ -3,6 +3,7 @@ var express = require('express');
 
 const uploadRouter = require('./routes/upload-router'); 
 const convertRouter = require('./routes/convert-router'); 
+const tilesRouter = require('./routes/tiles-router'); 
 
 var app = express();
 
@@ -11,6 +12,7 @@ app.get('/', (req, res) => res.sendFile(__dirname + '/public/index.html'));
 console.log(__dirname);
 app.use(uploadRouter);
 app.use(convertRouter);
+app.use(tilesRouter);
 
 app.use('/res/js/three/', express.static('node_modules/three/'));
 app.use('/res/js/mwm/', express.static('node_modules/mwm-renderer/dist/'));
